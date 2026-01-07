@@ -8,17 +8,19 @@ import passoff.chess.TestUtilities;
 
 /**
  * Tests if the ChessGame implementation can handle En Passant moves
- * En Passant is a situational move in chess taken directly after your opponent has double moved a pawn
- * If their pawn moves next to one of your pawns, so it passes where your pawn could have captured it, you
- * may capture their pawn with your pawn as if they had only moved a single space. You may only take this move
- * if you do so the turn directly following the pawns double move. This is as if you had caught their
- * pawn "in passing", or translated to French: "En Passant".
+ * En Passant is a situational move in chess taken directly after your opponent
+ * has double moved a pawn If their pawn moves next to one of your pawns, so it
+ * passes where your pawn could have captured it, you may capture their pawn
+ * with your pawn as if they had only moved a single space. You may only take
+ * this move if you do so the turn directly following the pawns double move.
+ * This is as if you had caught their pawn "in passing", or translated to
+ * French: "En Passant".
  */
 public class EnPassantTests {
 
-    @Test
-    @DisplayName("White En Passant Right")
-    public void enPassantWhiteRight() throws InvalidMoveException {
+  @Test
+  @DisplayName("White En Passant Right")
+  public void enPassantWhiteRight() throws InvalidMoveException {
         ChessBoard board = TestUtilities.loadBoard("""
                 | | | | | | | | |
                 | | |p| | | | | |
@@ -54,12 +56,11 @@ public class EnPassantTests {
                 """);
 
         assertValidEnPassant(board, ChessGame.TeamColor.BLACK, setupMove, enPassantMove, endBoard);
-    }
+  }
 
-
-    @Test
-    @DisplayName("White En Passant Left")
-    public void enPassantWhiteLeft() throws InvalidMoveException {
+  @Test
+  @DisplayName("White En Passant Left")
+  public void enPassantWhiteLeft() throws InvalidMoveException {
         ChessBoard board = TestUtilities.loadBoard("""
                 | | | | | | | | |
                 | | |p| | | | | |
@@ -95,12 +96,11 @@ public class EnPassantTests {
                 """);
 
         assertValidEnPassant(board, ChessGame.TeamColor.BLACK, setupMove, enPassantMove, endBoard);
-    }
+  }
 
-
-    @Test
-    @DisplayName("Black En Passant Right")
-    public void enPassantBlackRight() throws InvalidMoveException {
+  @Test
+  @DisplayName("Black En Passant Right")
+  public void enPassantBlackRight() throws InvalidMoveException {
         ChessBoard board = TestUtilities.loadBoard("""
                 | | | |k| | | | |
                 | | | | | | | | |
@@ -135,12 +135,11 @@ public class EnPassantTests {
                 """);
 
         assertValidEnPassant(board, ChessGame.TeamColor.WHITE, setupMove, enPassantMove, endBoard);
-    }
+  }
 
-
-    @Test
-    @DisplayName("Black En Passant Left")
-    public void enPassantBlackLeft() throws InvalidMoveException {
+  @Test
+  @DisplayName("Black En Passant Left")
+  public void enPassantBlackLeft() throws InvalidMoveException {
         ChessBoard board = TestUtilities.loadBoard("""
                 | | | |k| | | | |
                 | | | | | | | | |
@@ -174,12 +173,11 @@ public class EnPassantTests {
                 | | | | | | | | |
                 """);
         assertValidEnPassant(board, ChessGame.TeamColor.WHITE, setupMove, enPassantMove, endBoard);
-    }
+  }
 
-
-    @Test
-    @DisplayName("Can Only En Passant on Next Turn")
-    public void missedEnPassant() throws InvalidMoveException {
+  @Test
+  @DisplayName("Can Only En Passant on Next Turn")
+  public void missedEnPassant() throws InvalidMoveException {
         ChessBoard board = TestUtilities.loadBoard("""
                 | | | | |k| | | |
                 | | |p| | | | | |
@@ -226,24 +224,29 @@ public class EnPassantTests {
         ChessMove enPassantMove = new ChessMove(enPassantPosition, new ChessPosition(6, 3), null);
         Assertions.assertFalse(game.validMoves(enPassantPosition).contains(enPassantMove),
                 "ChessGame validMoves contained a En Passant move after the move became invalid");
-    }
+  }
 
-    private void assertValidEnPassant(ChessBoard board, ChessGame.TeamColor turn, ChessMove setupMove,
-                                      ChessMove enPassantMove, ChessBoard endBoard) throws InvalidMoveException {
-        ChessGame game = new ChessGame();
-        game.setBoard(board);
-        game.setTeamTurn(turn);
+  private void assertValidEnPassant(ChessBoard board, ChessGame.TeamColor turn,
+                                    ChessMove setupMove,
+                                    ChessMove enPassantMove,
+                                    ChessBoard endBoard)
+      throws InvalidMoveException {
+    ChessGame game = new ChessGame();
+    game.setBoard(board);
+    game.setTeamTurn(turn);
 
-        //setup prior move for en passant
-        game.makeMove(setupMove);
+    // setup prior move for en passant
+    game.makeMove(setupMove);
 
-        //make sure pawn has En Passant move
-        Assertions.assertTrue(game.validMoves(enPassantMove.getStartPosition()).contains(enPassantMove),
-                "ChessGame validMoves did not contain a valid En Passant move");
+    // make sure pawn has En Passant move
+    Assertions.assertTrue(
+        game.validMoves(enPassantMove.getStartPosition())
+            .contains(enPassantMove),
+        "ChessGame validMoves did not contain a valid En Passant move");
 
-        //en passant move works correctly
-        Assertions.assertDoesNotThrow(() -> game.makeMove(enPassantMove));
-        Assertions.assertEquals(endBoard, game.getBoard(), "Incorrect Board after En Passant Move");
-    }
-
+    // en passant move works correctly
+    Assertions.assertDoesNotThrow(() -> game.makeMove(enPassantMove));
+    Assertions.assertEquals(endBoard, game.getBoard(),
+                            "Incorrect Board after En Passant Move");
+  }
 }
