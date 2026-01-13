@@ -7,8 +7,14 @@ public class PieceMovesCalculator {
 
     public PieceMovesCalculator(){}
 
-    public void KingMove(){}
-    public void QueenMove(){}
+    public static Collection<ChessMove> KingMove(ChessPiece piece, ChessBoard board, ChessPosition myPosition){
+        Collection<ChessMove> validMoves = new ArrayList<>();
+        return validMoves;
+    }
+    public static Collection<ChessMove> QueenMove(ChessPiece piece, ChessBoard board, ChessPosition myPosition){
+        Collection<ChessMove> validMoves = new ArrayList<>();
+        return validMoves;
+    }
     public static Collection<ChessMove> BishopMove(ChessPiece piece, ChessBoard board, ChessPosition myPosition){
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
@@ -100,7 +106,16 @@ public class PieceMovesCalculator {
         }
         return validMoves;
     }
-    public void KnightMove(){}
-    public void RookMove(){}
-    public void PawnMove(){}
+    public static Collection<ChessMove> KnightMove(ChessPiece piece, ChessBoard board, ChessPosition myPosition){
+        Collection<ChessMove> validMoves = new ArrayList<>();
+        return validMoves;
+    }
+    public static Collection<ChessMove> RookMove(ChessPiece piece, ChessBoard board, ChessPosition myPosition){
+        Collection<ChessMove> validMoves = new ArrayList<>();
+        return validMoves;
+    }
+    public static Collection<ChessMove> PawnMove(ChessPiece piece, ChessBoard board, ChessPosition myPosition){
+        Collection<ChessMove> validMoves = new ArrayList<>();
+        return validMoves;
+    }
 }
