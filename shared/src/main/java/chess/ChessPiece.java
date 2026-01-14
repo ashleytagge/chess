@@ -58,15 +58,15 @@ public class ChessPiece {
         if(piece.getPieceType() == PieceType.BISHOP){
             return PieceMovesCalculator.BishopMove(piece, board, myPosition);
         }else if(piece.getPieceType() == PieceType.KING){
-            return PieceMovesCalculator.BishopMove(piece, board, myPosition);
+            return PieceMovesCalculator.KingMove(piece, board, myPosition);
         }else if(piece.getPieceType() == PieceType.QUEEN){
-            return PieceMovesCalculator.BishopMove(piece, board, myPosition);
+            return PieceMovesCalculator.QueenMove(piece, board, myPosition);
         }else if(piece.getPieceType() == PieceType.KNIGHT){
-            return PieceMovesCalculator.BishopMove(piece, board, myPosition);
+            return PieceMovesCalculator.KnightMove(piece, board, myPosition);
         }else if(piece.getPieceType() == PieceType.ROOK) {
-            return PieceMovesCalculator.BishopMove(piece, board, myPosition);
+            return PieceMovesCalculator.RookMove(piece, board, myPosition);
         }else if(piece.getPieceType() == PieceType.PAWN) {
-            return PieceMovesCalculator.BishopMove(piece, board, myPosition);
+            return PieceMovesCalculator.PawnMove(piece, board, myPosition);
         }else{
             System.out.print("ERROR: Unknown Piece Type. Cannot calculate valid moves.");
             return List.of(new ChessMove(myPosition, new ChessPosition(0,0), null));}
