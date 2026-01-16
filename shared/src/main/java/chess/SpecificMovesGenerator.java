@@ -3,9 +3,9 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class MovesGenerator {
+public class SpecificMovesGenerator {
     //move redundant code into this class so it only appears once
-    //Rook
+    //Rook && Queen
     public Collection<ChessMove> MoveMultipleLeft(){
         Collection<ChessMove> validMoves = new ArrayList<>();
         return validMoves;
@@ -22,7 +22,7 @@ public class MovesGenerator {
         Collection<ChessMove> validMoves = new ArrayList<>();
         return validMoves;
     }
-    //Bishop
+    //Bishop && Queen
     public Collection<ChessMove> MoveMultipleUpLeft(){
         Collection<ChessMove> validMoves = new ArrayList<>();
         return validMoves;
@@ -39,4 +39,7 @@ public class MovesGenerator {
         Collection<ChessMove> validMoves = new ArrayList<>();
         return validMoves;
     }
+    //King
+    //Pawn
+    //Knight
 }
