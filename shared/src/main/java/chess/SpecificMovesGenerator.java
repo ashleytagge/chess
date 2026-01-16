@@ -7,20 +7,91 @@ public class SpecificMovesGenerator {
     //move redundant code into this class so it only appears once
 
     //Rook && Queen
-    public Collection<ChessMove> MoveMultipleLeft(){
-        Collection<ChessMove> validMoves = new ArrayList<>();
+    public static Collection<ChessMove> MoveMultipleLeft(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        ChessGame.TeamColor teamColor = piece.getTeamColor();
+        int n = 1;
+        while(col - n >= 1){
+            ChessPosition tempPosition = new ChessPosition(row, col - n);
+            ChessPiece tempPiece = board.getPiece(tempPosition);
+            if(tempPiece == null) {
+                //if position row+1 col+1 is empty, add to valid moves and keep going diagonal
+                validMoves.add(new ChessMove(myPosition, tempPosition, null));
+                n += 1;
+                continue;
+            }
+            ChessGame.TeamColor tempColor = tempPiece.getTeamColor();
+            if( teamColor != tempColor){
+                validMoves.add(new ChessMove(myPosition, tempPosition, null));
+            }
+            break;
+        }
         return validMoves;
     }
-    public Collection<ChessMove> MoveMultipleRight(){
-        Collection<ChessMove> validMoves = new ArrayList<>();
+    public static Collection<ChessMove> MoveMultipleRight(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        ChessGame.TeamColor teamColor = piece.getTeamColor();
+        int n = 1;
+        while(col + n <= 8){
+            ChessPosition tempPosition = new ChessPosition(row, col + n);
+            ChessPiece tempPiece = board.getPiece(tempPosition);
+            if(tempPiece == null) {
+                validMoves.add(new ChessMove(myPosition, tempPosition, null));
+                n += 1;
+                continue;
+            }
+            ChessGame.TeamColor tempColor = tempPiece.getTeamColor();
+            if( teamColor != tempColor){
+                validMoves.add(new ChessMove(myPosition, tempPosition, null));
+            }
+            break;
+        }
         return validMoves;
     }
-    public Collection<ChessMove> MoveMultipleUp(){
-        Collection<ChessMove> validMoves = new ArrayList<>();
+    public static Collection<ChessMove> MoveMultipleUp(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        ChessGame.TeamColor teamColor = piece.getTeamColor();
+        int n = 1;
+        while(row + n <= 8){
+            ChessPosition tempPosition = new ChessPosition(row + n, col);
+            ChessPiece tempPiece = board.getPiece(tempPosition);
+            if(tempPiece == null) {
+                //if position row+1 col+1 is empty, add to valid moves and keep going diagonal
+                validMoves.add(new ChessMove(myPosition, tempPosition, null));
+                n += 1;
+                continue;
+            }
+            ChessGame.TeamColor tempColor = tempPiece.getTeamColor();
+            if( teamColor != tempColor){
+                validMoves.add(new ChessMove(myPosition, tempPosition, null));
+            }
+            break;
+        }
         return validMoves;
     }
-    public Collection<ChessMove> MoveMultipleDown(){
-        Collection<ChessMove> validMoves = new ArrayList<>();
+    public static Collection<ChessMove> MoveMultipleDown(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        ChessGame.TeamColor teamColor = piece.getTeamColor();
+        int n = 1;
+        while(row - n >= 1){
+            ChessPosition tempPosition = new ChessPosition(row - n, col);
+            ChessPiece tempPiece = board.getPiece(tempPosition);
+            if(tempPiece == null) {
+                //if position row+1 col+1 is empty, add to valid moves and keep going diagonal
+                validMoves.add(new ChessMove(myPosition, tempPosition, null));
+                n += 1;
+                continue;
+            }
+            ChessGame.TeamColor tempColor = tempPiece.getTeamColor();
+            if( teamColor != tempColor){
+                validMoves.add(new ChessMove(myPosition, tempPosition, null));
+            }
+            break;
+        }
         return validMoves;
     }
     //Bishop && Queen
