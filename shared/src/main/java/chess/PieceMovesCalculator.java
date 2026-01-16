@@ -3,9 +3,6 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static chess.ChessGame.TeamColor.BLACK;
-import static chess.ChessGame.TeamColor.WHITE;
-
 public class PieceMovesCalculator {
 
     public static Collection<ChessMove> KingMove(ChessPiece piece, ChessBoard board, ChessPosition myPosition){
@@ -134,21 +131,21 @@ public class PieceMovesCalculator {
         Collection<ChessMove> validMoves = new ArrayList<>();
 
         //up and to the right
-        validMoves = SpecificMovesGenerator.MoveMultipleUpRight(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleUpRight(validMoves, piece, myPosition, board);
         //up and to the left
-        validMoves = SpecificMovesGenerator.MoveMultipleUpLeft(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleUpLeft(validMoves, piece, myPosition, board);
         //down and to the left
-        validMoves = SpecificMovesGenerator.MoveMultipleDownLeft(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleDownLeft(validMoves, piece, myPosition, board);
         //down and to the right
-        validMoves = SpecificMovesGenerator.MoveMultipleDownRight(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleDownRight(validMoves, piece, myPosition, board);
         //up
-        validMoves = SpecificMovesGenerator.MoveMultipleUp(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleUp(validMoves, piece, myPosition, board);
         //down
-        validMoves = SpecificMovesGenerator.MoveMultipleDown(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleDown(validMoves, piece, myPosition, board);
         //left
-        validMoves = SpecificMovesGenerator.MoveMultipleLeft(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleLeft(validMoves, piece, myPosition, board);
         //right
-        validMoves = SpecificMovesGenerator.MoveMultipleRight(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleRight(validMoves, piece, myPosition, board);
         //return moves
         return validMoves;
     }
@@ -159,13 +156,13 @@ public class PieceMovesCalculator {
         Collection<ChessMove> validMoves = new ArrayList<>();
 
         //up and to the right
-        validMoves = SpecificMovesGenerator.MoveMultipleUpRight(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleUpRight(validMoves, piece, myPosition, board);
         //up and to the left
-        validMoves = SpecificMovesGenerator.MoveMultipleUpLeft(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleUpLeft(validMoves, piece, myPosition, board);
         //down and to the left
-        validMoves = SpecificMovesGenerator.MoveMultipleDownLeft(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleDownLeft(validMoves, piece, myPosition, board);
         //down and to the right
-        validMoves = SpecificMovesGenerator.MoveMultipleDownRight(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleDownRight(validMoves, piece, myPosition, board);
         //return moves
         return validMoves;
     }
@@ -285,13 +282,13 @@ public class PieceMovesCalculator {
     public static Collection<ChessMove> RookMove(ChessPiece piece, ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> validMoves = new ArrayList<>();
         //up
-        validMoves = SpecificMovesGenerator.MoveMultipleUp(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleUp(validMoves, piece, myPosition, board);
         //down
-        validMoves = SpecificMovesGenerator.MoveMultipleDown(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleDown(validMoves, piece, myPosition, board);
         //left
-        validMoves = SpecificMovesGenerator.MoveMultipleLeft(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleLeft(validMoves, piece, myPosition, board);
         //right
-        validMoves = SpecificMovesGenerator.MoveMultipleRight(validMoves, piece, myPosition, board);
+        validMoves = RepeatedMoves.MoveMultipleRight(validMoves, piece, myPosition, board);
         //return moves
         return validMoves;
     }
@@ -314,7 +311,7 @@ public class PieceMovesCalculator {
                     }
                     n += 1;
                 }
-                if(row -1 >= 1 && col - 1 >= 1){
+                if(col - 1 >= 1){
                     ChessPosition tempPosition2 = new ChessPosition(row - 1, col - 1);
                     ChessPiece tempPiece2 = board.getPiece(tempPosition2);
                     if (tempPiece2 != null) {
@@ -323,7 +320,7 @@ public class PieceMovesCalculator {
                             validMoves.add(new ChessMove(myPosition, tempPosition2, null));
                         }
                     }}
-                if(row-1 >= 1 && col + 1 <= 8){
+                if(col + 1 <= 8){
                     ChessPosition tempPosition3 = new ChessPosition(row - 1, col + 1);
                     ChessPiece tempPiece3 = board.getPiece(tempPosition3);
                     if (tempPiece3 != null) {
@@ -338,11 +335,8 @@ public class PieceMovesCalculator {
                     ChessPiece tempPiece = board.getPiece(tempPosition);
                     if (tempPiece == null && row - 1 != 1) {
                         validMoves.add(new ChessMove(myPosition, tempPosition, null));
-                    }else if(tempPiece == null && row - 1 == 1){
-                        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.QUEEN));
-                        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.BISHOP));
-                        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.ROOK));
-                        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.KNIGHT));
+                    }else if(tempPiece == null){
+                        validMoves = RepeatedMoves.AddPromotionPiece(myPosition, tempPosition, validMoves);
                     }}
                 if(row -1 >= 1 && col - 1 >= 1){
                     ChessPosition tempPosition2 = new ChessPosition(row - 1, col - 1);
@@ -352,13 +346,10 @@ public class PieceMovesCalculator {
                         if(tempColor2 != teamColor) {
                             validMoves.add(new ChessMove(myPosition, tempPosition2, null));
                         }
-                    }else if(tempPiece2 != null && row - 1 == 1){
+                    }else if(tempPiece2 != null){
                         ChessGame.TeamColor tempColor2 = tempPiece2.getTeamColor();
                         if(tempColor2 != teamColor) {
-                            validMoves.add(new ChessMove(myPosition, tempPosition2, ChessPiece.PieceType.QUEEN));
-                            validMoves.add(new ChessMove(myPosition, tempPosition2, ChessPiece.PieceType.BISHOP));
-                            validMoves.add(new ChessMove(myPosition, tempPosition2, ChessPiece.PieceType.ROOK));
-                            validMoves.add(new ChessMove(myPosition, tempPosition2, ChessPiece.PieceType.KNIGHT));
+                            validMoves = RepeatedMoves.AddPromotionPiece(myPosition, tempPosition2, validMoves);
                         }
                     }}
                 if(row-1 >= 1 && col + 1 <= 8){
@@ -369,13 +360,10 @@ public class PieceMovesCalculator {
                         if(tempColor3 != teamColor) {
                             validMoves.add(new ChessMove(myPosition, tempPosition3, null));
                         }
-                    }else if(tempPiece3 != null && row - 1 == 1){
+                    }else if(tempPiece3 != null){
                         ChessGame.TeamColor tempColor2 = tempPiece3.getTeamColor();
                         if(tempColor2 != teamColor) {
-                            validMoves.add(new ChessMove(myPosition, tempPosition3, ChessPiece.PieceType.QUEEN));
-                            validMoves.add(new ChessMove(myPosition, tempPosition3, ChessPiece.PieceType.BISHOP));
-                            validMoves.add(new ChessMove(myPosition, tempPosition3, ChessPiece.PieceType.ROOK));
-                            validMoves.add(new ChessMove(myPosition, tempPosition3, ChessPiece.PieceType.KNIGHT));
+                            validMoves = RepeatedMoves.AddPromotionPiece(myPosition, tempPosition3, validMoves);
                         }
                     }
                 }
@@ -393,7 +381,7 @@ public class PieceMovesCalculator {
                     }
                     n += 1;
                 }
-                if(row +1 <= 8 && col + 1 <=8){
+                if(col + 1 <=8){
                     ChessPosition tempPosition2 = new ChessPosition(row + 1, col + 1);
                     ChessPiece tempPiece2 = board.getPiece(tempPosition2);
                     if (tempPiece2 != null) {
@@ -402,7 +390,7 @@ public class PieceMovesCalculator {
                             validMoves.add(new ChessMove(myPosition, tempPosition2, null));
                         }
                     }}
-                if(row + 1 <= 8 && col - 1 >= 1){
+                if(col - 1 >= 1){
                     ChessPosition tempPosition3 = new ChessPosition(row + 1, col - 1);
                     ChessPiece tempPiece3 = board.getPiece(tempPosition3);
                     if (tempPiece3 != null) {
@@ -416,10 +404,7 @@ public class PieceMovesCalculator {
                     ChessPosition tempPosition = new ChessPosition(row + 1, col);
                     ChessPiece tempPiece = board.getPiece(tempPosition);
                     if (tempPiece == null && row + 1 == 8) {
-                        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.QUEEN));
-                        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.BISHOP));
-                        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.ROOK));
-                        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.KNIGHT));
+                        validMoves = RepeatedMoves.AddPromotionPiece(myPosition, tempPosition, validMoves);
                     }else if(tempPiece  == null){
                         validMoves.add(new ChessMove(myPosition, tempPosition, null));
                     }}
@@ -429,10 +414,7 @@ public class PieceMovesCalculator {
                     if (tempPiece2 != null) {
                         ChessGame.TeamColor tempColor2 = tempPiece2.getTeamColor();
                         if (tempColor2 != teamColor && row + 1 == 8) {
-                            validMoves.add(new ChessMove(myPosition, tempPosition2, ChessPiece.PieceType.QUEEN));
-                            validMoves.add(new ChessMove(myPosition, tempPosition2, ChessPiece.PieceType.BISHOP));
-                            validMoves.add(new ChessMove(myPosition, tempPosition2, ChessPiece.PieceType.ROOK));
-                            validMoves.add(new ChessMove(myPosition, tempPosition2, ChessPiece.PieceType.KNIGHT));
+                            validMoves = RepeatedMoves.AddPromotionPiece(myPosition, tempPosition2, validMoves);
                         }else if (tempColor2 != teamColor){
                             validMoves.add(new ChessMove(myPosition, tempPosition2, null));
                         }
@@ -440,13 +422,10 @@ public class PieceMovesCalculator {
                 if(col + 1 <= 8 && row + 1 <= 8){
                     ChessPosition tempPosition3 = new ChessPosition(row + 1, col + 1);
                     ChessPiece tempPiece3 = board.getPiece(tempPosition3);
-                    if (tempPiece3 != null) {
+                    if(tempPiece3 != null) {
                         ChessGame.TeamColor tempColor3 = tempPiece3.getTeamColor();
                         if (tempColor3 != teamColor && row + 1 == 8) {
-                            validMoves.add(new ChessMove(myPosition, tempPosition3, ChessPiece.PieceType.QUEEN));
-                            validMoves.add(new ChessMove(myPosition, tempPosition3, ChessPiece.PieceType.BISHOP));
-                            validMoves.add(new ChessMove(myPosition, tempPosition3, ChessPiece.PieceType.ROOK));
-                            validMoves.add(new ChessMove(myPosition, tempPosition3, ChessPiece.PieceType.KNIGHT));
+                            validMoves = RepeatedMoves.AddPromotionPiece(myPosition, tempPosition3, validMoves);
                         }else if(tempColor3 != teamColor){ validMoves.add(new ChessMove(myPosition, tempPosition3, null));}
                     }}
             }

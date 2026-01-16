@@ -1,9 +1,8 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-public class SpecificMovesGenerator {
+public class RepeatedMoves {
     //move redundant code into this class so it only appears once
 
     //Rook && Queen
@@ -196,7 +195,11 @@ public class SpecificMovesGenerator {
         return validMoves;
     }
 
-    //King
-    //Pawn
-    //Knight
+    public static Collection<ChessMove> AddPromotionPiece(ChessPosition myPosition, ChessPosition tempPosition, Collection<ChessMove> validMoves){
+        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.QUEEN));
+        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.BISHOP));
+        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.ROOK));
+        validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.KNIGHT));
+        return validMoves;
+    }
 }
