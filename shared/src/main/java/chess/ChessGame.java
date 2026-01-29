@@ -11,11 +11,11 @@ import java.util.Objects;
  */
 public class ChessGame {
 
-    private ChessBoard board;
+    private ChessBoard Board;
     private TeamColor teamColor;
 
     public ChessGame() {
-        board = new ChessBoard();
+        Board = new ChessBoard();
         teamColor = ChessGame.TeamColor.WHITE;
     }
 
@@ -33,7 +33,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        teamColor = team;
     }
 
     /**
@@ -52,7 +52,17 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        /*
+        * Takes as input a position on the chessboard and
+        * returns all moves the piece there can legally make.
+        * If there is no piece at that location, this method returns null.
+        * A move is valid if it is a "piece move" for the piece
+        * at the input location and making that move would not
+        * leave the team’s king in danger of check.*/
+        Collection<ChessMove> validMovesList;
+        ChessPiece piece = Board.getPiece(startPosition);
+        validMovesList = piece.pieceMoves(Board, startPosition);
+        return validMovesList;
     }
 
     /**
@@ -62,7 +72,12 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        /*Receives a given move and executes it, provided
+        it is a legal move. If the move is illegal, it
+        throws an InvalidMoveException. A move is illegal
+        if it is not a "valid" move for the piece at the
+        starting location, or if it’s not the corresponding
+        team's turn.*/
     }
 
     /**
@@ -72,6 +87,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+        //Returns true if the specified team’s King could be captured by an opposing piece.
         throw new RuntimeException("Not implemented");
     }
 
@@ -82,6 +98,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
+        //Returns true if the given team has no way to protect their king from being captured.
         throw new RuntimeException("Not implemented");
     }
 
@@ -93,6 +110,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+        //Returns true if the given team has no legal moves but their king is not in immediate danger.
         throw new RuntimeException("Not implemented");
     }
 
@@ -102,7 +120,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.Board = board;
     }
 
     /**
@@ -111,7 +129,7 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return Board;
     }
 
     @Override
@@ -120,11 +138,11 @@ public class ChessGame {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return Objects.equals(board, chessGame.board) && teamColor == chessGame.teamColor;
+        return Objects.equals(Board, chessGame.Board) && teamColor == chessGame.teamColor;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(board, teamColor);
+        return Objects.hash(Board, teamColor);
     }
 }
