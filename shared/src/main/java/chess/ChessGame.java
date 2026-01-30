@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -59,9 +61,30 @@ public class ChessGame {
         * A move is valid if it is a "piece move" for the piece
         * at the input location and making that move would not
         * leave the team’s king in danger of check.*/
+        //to remove from a collection use .hasnext, .next iterator, and the .remove
         Collection<ChessMove> validMovesList;
+        Collection<ChessMove> dangerousMovesList = new ArrayList<>();
         ChessPiece piece = Board.getPiece(startPosition);
-        validMovesList = piece.pieceMoves(Board, startPosition);
+        if(piece == null){
+            return null;
+        }else{
+            validMovesList = piece.pieceMoves(Board, startPosition);
+            int counter = validMovesList.size();
+            //loop through validMovesList and check if moving to that
+            Iterator<ChessMove> updatedValidMoves = validMovesList.iterator();
+               while(updatedValidMoves.hasNext()){
+                   ChessMove move = updatedValidMoves.next();
+                   //position would leave the team's king in danger of check
+                   if(inDangerOfCheck(move)) {
+                       /*DO THIS IN inDangerOfCheck When in your ChessGame.validMoves, you may want to create
+                        a copy/clone of the ChessBoard so that you can make a piece move
+                        and see if you are still in check to know if that is a valid
+                        move or not.*/
+                        //if yes, remove it from the list
+                        updatedValidMoves.remove();
+                    }
+            }
+        }
         return validMovesList;
     }
 
