@@ -93,7 +93,7 @@ public class ChessBoard implements Cloneable{
     //row by row, then finally putting the 2d array into the cloned ChessBoard.
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    protected ChessBoard clone() {
         try {
             ChessBoard clone = (ChessBoard) super.clone();
             clone.squares = new ChessPiece[8][8];

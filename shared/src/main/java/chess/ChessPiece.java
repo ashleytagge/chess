@@ -87,7 +87,7 @@ public class ChessPiece implements Cloneable{
     }
 
     @Override
-    protected ChessPiece clone() throws CloneNotSupportedException {
+    protected ChessPiece clone() {
         try {
             return (ChessPiece) super.clone();
         } catch (CloneNotSupportedException e){

@@ -58,7 +58,7 @@ public class ChessGame {
         // then in the override clone method, you loop through the 2d ChessPiece array,
         // and do Arrays.copyOf to copy the chess board row by row, then finally putting
         // the 2d array into the cloned ChessBoard.
-        ChessBoard board = getBoard();
+        ChessBoard tempBoard = Board.clone();
         return true;
     }
 
