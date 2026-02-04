@@ -21,7 +21,6 @@ public class ChessGame {
         teamColor = ChessGame.TeamColor.WHITE;
     }
 
-
     /**
      * @return Which team's turn it is
      */
@@ -53,6 +52,16 @@ public class ChessGame {
      * @return Set of valid moves for requested piece, or null if no piece at
      * startPosition
      */
+    private boolean inDangerOfCheck(ChessMove move){
+        //create deep copy of board so I can check it without altering it
+        // One such method is to have ChessBoard implement Cloneable,
+        // then in the override clone method, you loop through the 2d ChessPiece array,
+        // and do Arrays.copyOf to copy the chess board row by row, then finally putting
+        // the 2d array into the cloned ChessBoard.
+        ChessBoard board = getBoard();
+        return true;
+    }
+
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         /*
         * Takes as input a position on the chessboard and

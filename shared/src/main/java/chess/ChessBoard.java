@@ -2,14 +2,13 @@ package chess;
 
 import java.util.Arrays;
 import java.util.Objects;
-
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessBoard {
+public class ChessBoard implements Cloneable{
 
     ChessPiece [][] squares = new ChessPiece[8][8];
     public ChessBoard() {
@@ -88,5 +87,35 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(squares);
+    }
+
+    //you loop through the 2d ChessPiece array, and do Arrays.copyOf to copy the chess board
+    //row by row, then finally putting the 2d array into the cloned ChessBoard.
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        try {
+            ChessBoard clone = (ChessBoard) super.clone();
+            clone.squares = new ChessPiece[8][8];
+
+            //clone copy the board here
+            for(int row = 0; row < 8; row++){
+                //Arrays.copyOf needs what you're copying and length of new array
+                //but this alone is a shallow copy. They're sharing the same pieces still.
+                clone.squares[row] = Arrays.copyOf(this.squares[row], 8);
+
+                for(int col = 0; col < 8; col++){
+                    ChessPiece originalPiece = clone.squares[row][col];
+                    if(originalPiece == null){
+                        clone.squares[row][col] = null;
+                    }else{
+                        clone.squares[row][col] = originalPiece.clone();
+                    }
+                }
+            }
+            return clone;
+        }catch (CloneNotSupportedException e){
+            throw new RuntimeException(e);
+        }
     }
 }
