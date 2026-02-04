@@ -45,13 +45,12 @@ public class ChessGame {
         BLACK
     }
 
-    /**
-     * Gets a valid moves for a piece at the given location
-     *
-     * @param startPosition the piece to get valid moves for
-     * @return Set of valid moves for requested piece, or null if no piece at
-     * startPosition
-     */
+
+     // Gets a valid moves for a piece at the given location
+     // @param startPosition the piece to get valid moves for
+     // @return Set of valid moves for requested piece, or null if no piece at
+     // startPosition
+
     private boolean inDangerOfCheck(ChessMove move){
         //create deep copy of board so I can check it without altering it
         // One such method is to have ChessBoard implement Cloneable,
