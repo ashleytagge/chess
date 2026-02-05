@@ -19,6 +19,7 @@ public class ChessGame {
     public ChessGame() {
         Board = new ChessBoard();
         teamColor = ChessGame.TeamColor.WHITE;
+        Board.resetBoard();
     }
 
     /**
@@ -251,7 +252,34 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         //Returns true if the given team has no way to protect their king from being captured.
-        return false;
+        if(isInCheck(teamColor)){
+            for(int row = 1; row < 9; row++){
+                for(int col = 1; col < 9; col++){
+                    ChessPosition position = new ChessPosition(row, col);
+                    ChessPiece piece = Board.getPiece(position);
+                    if(piece != null && piece.getTeamColor() == teamColor){
+                        Collection<ChessMove> pieceMoves = new ArrayList <>();
+                        pieceMoves = piece.pieceMoves(Board, position);
+                        //simulate move on copy of board and see if the king is still in check
+                        for(ChessMove move : pieceMoves){
+                            if(!inDangerOfCheck(move)){
+                                return false;
+                            }
+                        }
+                        //if the king is still in check, do nothing
+                        //if the king is not in check then return false
+                    }
+                }
+            }
+            return true;
+            //if you get all the way through that loop return true;
+        }else{
+            return false;
+        }
+        //if in check
+        //get all valid moves for the pieces on the board, try all the moves for each piece
+        //if the king is still in check after then it is in checkmate and return true
+        //otherwise return false
     }
 
     /**
@@ -263,7 +291,31 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         //Returns true if the given team has no legal moves but their king is not in immediate danger.
-       return true;
+        if(!isInCheck(teamColor)) {
+            for (int row = 1; row < 9; row++) {
+                for (int col = 1; col < 9; col++) {
+                    ChessPosition position = new ChessPosition(row, col);
+                    ChessPiece piece = Board.getPiece(position);
+                    if (piece != null && piece.getTeamColor() == teamColor) {
+                        Collection<ChessMove> pieceMoves = new ArrayList<>();
+                        pieceMoves = piece.pieceMoves(Board, position);
+                        //simulate move on copy of board and see if the king is still in check
+                        for (ChessMove move : pieceMoves) {
+                            if (!inDangerOfCheck(move)) {
+                                return false;
+                            }
+                        }
+                        //if the king is still in check, do nothing
+                        //if the king is not in check then return false
+                    }
+                }
+            }
+            return true;
+            //if you get all the way through that loop return true;
+        } else {
+
+            return false;
+        }
     }
 
     /**
