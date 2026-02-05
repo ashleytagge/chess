@@ -203,7 +203,44 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         //Returns true if the specified team’s King could be captured by an opposing piece.
-        throw new RuntimeException("Not implemented");
+        ChessPosition king = null;
+        TeamColor enemyColor;
+        if(teamColor == TeamColor.WHITE){
+            enemyColor = TeamColor.BLACK;
+        }else{
+            enemyColor = TeamColor.WHITE;
+        }
+
+        for(int row = 1; row < 9; row++){
+            for(int col = 1; col < 9; col++){
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece findKingPiece = Board.getPiece(pos);
+                if(findKingPiece != null && findKingPiece.getPieceType().equals(ChessPiece.PieceType.KING) && findKingPiece.getTeamColor().equals(teamColor)){
+                    king = pos;
+                    break;
+                }
+            }
+        }
+
+        Collection<ChessMove> opponentMoves = new ArrayList <>();
+        for(int row = 1; row < 9; row++){
+            for(int col = 1; col < 9; col++){
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = Board.getPiece(position);
+                if(piece != null && piece.getTeamColor() == enemyColor){
+                    Collection<ChessMove> pieceMoves = new ArrayList <>();
+                    pieceMoves = piece.pieceMoves(Board, position);
+                    opponentMoves.addAll(pieceMoves);
+                }
+            }
+        }
+        //if the kings pos is in list of capture moves return true
+        for(ChessMove elem : opponentMoves){
+            if(elem.getEndPosition().equals(king)){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -214,7 +251,7 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         //Returns true if the given team has no way to protect their king from being captured.
-        throw new RuntimeException("Not implemented");
+        return false;
     }
 
     /**
@@ -226,7 +263,7 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         //Returns true if the given team has no legal moves but their king is not in immediate danger.
-        throw new RuntimeException("Not implemented");
+       return true;
     }
 
     /**
