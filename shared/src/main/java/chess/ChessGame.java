@@ -147,6 +147,52 @@ public class ChessGame {
         if it is not a "valid" move for the piece at the
         starting location, or if it’s not the corresponding
         team's turn.*/
+        ChessPiece validatePiece = Board.getPiece(move.getStartPosition());
+        if(validatePiece == null){
+            throw new InvalidMoveException("There is no piece at that start position");
+        }else if(validatePiece.getTeamColor() != getTeamTurn()){
+            throw new InvalidMoveException("It is not your turn");
+        }
+
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
+        if(validMoves.contains(move)){
+            //make move
+            ChessPosition startPosition = move.getStartPosition();
+            ChessPosition endPosition = move.getEndPosition();
+            ChessPiece tempPiece = Board.getPiece(startPosition);
+            if(tempPiece.getPieceType() == ChessPiece.PieceType.PAWN){
+                ChessPiece.PieceType promotion = move.getPromotionPiece();
+                if(promotion == ChessPiece.PieceType.QUEEN){
+                    ChessPiece promoteQueen = new ChessPiece(getTeamTurn(), ChessPiece.PieceType.QUEEN);
+                    Board.addPiece(endPosition, promoteQueen);
+                }else if(promotion == ChessPiece.PieceType.BISHOP){
+                    ChessPiece promoteBishop = new ChessPiece(getTeamTurn(), ChessPiece.PieceType.BISHOP);
+                    Board.addPiece(endPosition, promoteBishop);
+                }else if(promotion == ChessPiece.PieceType.ROOK){
+                    ChessPiece promoteRook = new ChessPiece(getTeamTurn(), ChessPiece.PieceType.ROOK);
+                    Board.addPiece(endPosition, promoteRook);
+                }else if(promotion == ChessPiece.PieceType.KNIGHT){
+                    ChessPiece promoteKnight = new ChessPiece(getTeamTurn(), ChessPiece.PieceType.KNIGHT);
+                    Board.addPiece(endPosition, promoteKnight);
+                }else{
+                    Board.addPiece(endPosition, tempPiece);
+                    Board.addPiece(startPosition, null);
+                }
+                Board.addPiece(startPosition, null);
+            }else{
+                Board.addPiece(endPosition, tempPiece);
+                Board.addPiece(startPosition, null);
+            }
+                //change team turns
+            TeamColor currentTeam = tempPiece.getTeamColor();
+            if(currentTeam == TeamColor.WHITE){
+                setTeamTurn(TeamColor.BLACK);
+            }else{
+                setTeamTurn(TeamColor.WHITE);
+            }
+        }else{
+            throw new InvalidMoveException("Invalid Move");
+        }
     }
 
     /**
