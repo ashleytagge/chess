@@ -52,13 +52,58 @@ public class ChessGame {
      // startPosition
 
     private boolean inDangerOfCheck(ChessMove move){
-        //create deep copy of board so I can check it without altering it
+        //create deep copy of board so I can check it without altering the og
         // One such method is to have ChessBoard implement Cloneable,
         // then in the override clone method, you loop through the 2d ChessPiece array,
         // and do Arrays.copyOf to copy the chess board row by row, then finally putting
         // the 2d array into the cloned ChessBoard.
         ChessBoard tempBoard = Board.clone();
-        return true;
+        ChessPosition kingPosition = null;
+
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+        ChessPiece tempPiece = tempBoard.getPiece(startPosition);
+        tempBoard.addPiece(endPosition, tempPiece);
+        tempBoard.addPiece(startPosition, null);
+        TeamColor currentTeam = tempPiece.getTeamColor();
+        TeamColor opposingTeam;
+        if(currentTeam == TeamColor.BLACK){
+            opposingTeam = TeamColor.WHITE;
+        }else{
+            opposingTeam = TeamColor.BLACK;
+        }
+
+        for(int row = 1; row < 9; row++){
+            for(int col = 1; col < 9; col++){
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece findKingPiece = tempBoard.getPiece(pos);
+                if(findKingPiece != null && findKingPiece.getPieceType().equals(ChessPiece.PieceType.KING) && findKingPiece.getTeamColor().equals(currentTeam)){
+                    kingPosition = pos;
+                    break;
+                }
+            }
+        }
+        //get the valid moves lists for the opposing teams pieces that would
+        //capture the king after this move piece
+        Collection<ChessMove> opponentMoves = new ArrayList <>();
+        for(int row = 1; row < 9; row++){
+            for(int col = 1; col < 9; col++){
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = tempBoard.getPiece(position);
+                if(piece != null && piece.getTeamColor().equals(opposingTeam)){
+                    Collection<ChessMove> pieceMoves = new ArrayList <>();
+                    pieceMoves = piece.pieceMoves(tempBoard, position);
+                    opponentMoves.addAll(pieceMoves);
+                }
+            }
+        }
+        //if the kings pos is in list of capture moves return true
+        for(ChessMove elem : opponentMoves){
+            if(elem.getEndPosition().equals(kingPosition)){
+                return true;
+            }
+        }
+        return false;
     }
 
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
@@ -71,27 +116,20 @@ public class ChessGame {
         * leave the team’s king in danger of check.*/
         //to remove from a collection use .hasnext, .next iterator, and the .remove
         Collection<ChessMove> validMovesList;
-        Collection<ChessMove> dangerousMovesList = new ArrayList<>();
-        ChessPiece piece = Board.getPiece(startPosition);
+        ChessPiece piece = Board.getPiece(startPosition); //does this need to be from the copied board?
         if(piece == null){
             return null;
         }else{
             validMovesList = piece.pieceMoves(Board, startPosition);
             int counter = validMovesList.size();
             //loop through validMovesList and check if moving to that
-            Iterator<ChessMove> updatedValidMoves = validMovesList.iterator();
-               while(updatedValidMoves.hasNext()){
-                   ChessMove move = updatedValidMoves.next();
-                   //position would leave the team's king in danger of check
-                   if(inDangerOfCheck(move)) {
-                       /*DO THIS IN inDangerOfCheck When in your ChessGame.validMoves, you may want to create
+            //position would leave the team's king in danger of check
+            /*DO THIS IN inDangerOfCheck When in your ChessGame.validMoves, you may want to create
                         a copy/clone of the ChessBoard so that you can make a piece move
                         and see if you are still in check to know if that is a valid
                         move or not.*/
-                        //if yes, remove it from the list
-                        updatedValidMoves.remove();
-                    }
-            }
+            //if yes, remove it from the list
+            validMovesList.removeIf(this::inDangerOfCheck);
         }
         return validMovesList;
     }
