@@ -56,17 +56,17 @@ public class ChessPiece implements Cloneable{
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
         if(piece.getPieceType() == PieceType.BISHOP){
-            return PieceMovesCalculator.BishopMove(piece, board, myPosition);
+            return PieceMovesCalculator.bishopMove(piece, board, myPosition);
         }else if(piece.getPieceType() == PieceType.KING){
-            return PieceMovesCalculator.KingMove(piece, board, myPosition);
+            return PieceMovesCalculator.kingMove(piece, board, myPosition);
         }else if(piece.getPieceType() == PieceType.QUEEN){
-            return PieceMovesCalculator.QueenMove(piece, board, myPosition);
+            return PieceMovesCalculator.queenMove(piece, board, myPosition);
         }else if(piece.getPieceType() == PieceType.KNIGHT){
-            return PieceMovesCalculator.KnightMove(piece, board, myPosition);
+            return PieceMovesCalculator.knightMove(piece, board, myPosition);
         }else if(piece.getPieceType() == PieceType.ROOK) {
-            return PieceMovesCalculator.RookMove(piece, board, myPosition);
+            return PieceMovesCalculator.rookMove(piece, board, myPosition);
         }else if(piece.getPieceType() == PieceType.PAWN) {
-            return PieceMovesCalculator.PawnMove(piece, board, myPosition);
+            return PieceMovesCalculator.pawnMove(piece, board, myPosition);
         }else{
             System.out.print("ERROR: Unknown Piece Type. Cannot calculate valid moves.");
             return List.of(new ChessMove(myPosition, new ChessPosition(0,0), null));}

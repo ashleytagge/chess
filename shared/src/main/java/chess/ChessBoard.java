@@ -118,4 +118,49 @@ public class ChessBoard implements Cloneable{
             throw new RuntimeException(e);
         }
     }
+
+    private char pieceToChar(ChessPiece piece) {
+        char c;
+
+        switch (piece.getPieceType()) {
+            case KING -> c = 'K';
+            case QUEEN -> c = 'Q';
+            case ROOK -> c = 'R';
+            case BISHOP -> c = 'B';
+            case KNIGHT -> c = 'N';
+            case PAWN -> c = 'P';
+            default -> c = '?';
+        }
+
+        if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            c = Character.toLowerCase(c);
+        }
+
+        return c;
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        for (int row = 8; row >= 1; row--) {
+            sb.append(row).append(" ");
+
+            for (int col = 1; col <= 8; col++) {
+                ChessPiece piece = getPiece(new ChessPosition(row, col));
+
+                if (piece == null) {
+                    sb.append(". ");
+                } else {
+                    sb.append(pieceToChar(piece)).append(" ");
+                }
+            }
+            sb.append("\n");
+        }
+
+        sb.append("  a b c d e f g h\n");
+        return sb.toString();
+    }
+
 }

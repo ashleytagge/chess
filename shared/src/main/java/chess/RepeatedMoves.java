@@ -6,7 +6,7 @@ public class RepeatedMoves {
     //move redundant code into this class so it only appears once
 
     //Rook && Queen
-    public static Collection<ChessMove> MoveMultipleLeft(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+    public static Collection<ChessMove> moveMultipleLeft(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         ChessGame.TeamColor teamColor = piece.getTeamColor();
@@ -28,7 +28,7 @@ public class RepeatedMoves {
         }
         return validMoves;
     }
-    public static Collection<ChessMove> MoveMultipleRight(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+    public static Collection<ChessMove> moveMultipleRight(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         ChessGame.TeamColor teamColor = piece.getTeamColor();
@@ -49,7 +49,7 @@ public class RepeatedMoves {
         }
         return validMoves;
     }
-    public static Collection<ChessMove> MoveMultipleUp(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+    public static Collection<ChessMove> moveMultipleUp(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         ChessGame.TeamColor teamColor = piece.getTeamColor();
@@ -71,7 +71,7 @@ public class RepeatedMoves {
         }
         return validMoves;
     }
-    public static Collection<ChessMove> MoveMultipleDown(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+    public static Collection<ChessMove> moveMultipleDown(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         ChessGame.TeamColor teamColor = piece.getTeamColor();
@@ -94,7 +94,7 @@ public class RepeatedMoves {
         return validMoves;
     }
     //Bishop && Queen
-    public static Collection<ChessMove> MoveMultipleUpLeft(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+    public static Collection<ChessMove> moveMultipleUpLeft(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         ChessGame.TeamColor teamColor = piece.getTeamColor();
@@ -120,7 +120,7 @@ public class RepeatedMoves {
         }
         return validMoves;
     }
-    public static Collection<ChessMove> MoveMultipleUpRight(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+    public static Collection<ChessMove> moveMultipleUpRight(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
         ChessGame.TeamColor teamColor = piece.getTeamColor();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
@@ -142,7 +142,7 @@ public class RepeatedMoves {
         }
         return validMoves;
     }
-    public static Collection<ChessMove> MoveMultipleDownLeft(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+    public static Collection<ChessMove> moveMultipleDownLeft(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         ChessGame.TeamColor teamColor = piece.getTeamColor();
@@ -168,7 +168,7 @@ public class RepeatedMoves {
         }
         return validMoves;
     }
-    public static Collection<ChessMove> MoveMultipleDownRight(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+    public static Collection<ChessMove> moveMultipleDownRight(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition myPosition, ChessBoard board){
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         ChessGame.TeamColor teamColor = piece.getTeamColor();
@@ -195,7 +195,7 @@ public class RepeatedMoves {
         return validMoves;
     }
 
-    public static Collection<ChessMove> AddPromotionPiece(ChessPosition myPosition, ChessPosition tempPosition, Collection<ChessMove> validMoves){
+    public static Collection<ChessMove> addPromotionPiece(ChessPosition myPosition, ChessPosition tempPosition, Collection<ChessMove> validMoves){
         validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.QUEEN));
         validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.BISHOP));
         validMoves.add(new ChessMove(myPosition, tempPosition, ChessPiece.PieceType.ROOK));
