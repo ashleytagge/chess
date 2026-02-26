@@ -13,13 +13,14 @@ public class UserDAO {
 
     //void insertUser(UserData u) throws DataAccessException
 
-    void createUser(){
+    public void createUser(){
         //create a new user
     }
-    void getUser(){
+    public void getUser(){
         /*
          * Retrieve a user with the given username.
          * */
         //if username doesn't exist throw DataAccessException
     }
+    public void clearUsers(){}
 }

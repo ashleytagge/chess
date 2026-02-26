@@ -11,16 +11,18 @@ public class AuthDAO {
     Update objects already in the data store
     Delete objects from the data store
      */
-    void createAuth(){
+    public void createAuth(){
         //Create a new authorization.
     }
-    void getAuth(){
+    public void getAuth(){
         //Retrieve an authorization given an authToken.
 
         //if auth doesn't exist throw DataAccessException
 
     }
-    void deleteAuth(){
+    public void deleteAuth(){
         //Delete an authorization so that it is no longer valid.
     }
+    public void clearAuths(){}
+
 }
