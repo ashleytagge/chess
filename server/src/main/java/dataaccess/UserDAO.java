@@ -2,7 +2,7 @@ package dataaccess;
 
 import model.UserData;
 
-public class UserDAO {
+public interface UserDAO {
     /*
     Add User Data
     Get User Data
