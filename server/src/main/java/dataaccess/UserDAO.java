@@ -15,16 +15,7 @@ public interface UserDAO {
 
     //void insertUser(UserData u) throws DataAccessException
 
-    public void insertUser(UserData user){
-        //insert user
-        //throw exception if user alrady exists don't forget this here
-    }
-    public String getUser(){
-        /*
-         * Retrieve a user with the given username.
-         * */
-        //if username doesn't exist throw DataAccessException
-        return "username";
-    }
-    public void clearUsers(){}
+    void insertUser(UserData user) throws DataAccessException;
+    UserData getUser(String username) throws DataAccessException;
+    void clearUsers() throws DataAccessException;
 }
