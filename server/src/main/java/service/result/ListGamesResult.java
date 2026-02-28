@@ -1,7 +1,7 @@
 package service.result;
 
-import java.util.List;
+import java.util.ArrayList;
 
-public record ListGamesResult(List<GameData> games) {
+public record ListGamesResult(ArrayList<GameData> games) {
     public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName){}
 }
