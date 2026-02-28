@@ -1,6 +1,6 @@
 package model;
 
-public record AuthData(String Field, String password, String email) {
+public record AuthData(String authToken, String username) {
     /*
     Field	Type
     username String

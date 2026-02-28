@@ -1,5 +1,7 @@
 package dataaccess;
 
+import model.UserData;
+
 public class UserDAO {
     /*
     Add User Data
@@ -13,14 +15,16 @@ public class UserDAO {
 
     //void insertUser(UserData u) throws DataAccessException
 
-    public void createUser(){
-        //create a new user
+    public void insertUser(UserData user){
+        //insert user
+        //throw exception if user alrady exists don't forget this here
     }
-    public void getUser(){
+    public String getUser(){
         /*
          * Retrieve a user with the given username.
          * */
         //if username doesn't exist throw DataAccessException
+        return "username";
     }
     public void clearUsers(){}
 }

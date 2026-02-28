@@ -1,6 +1,8 @@
 package dataaccess;
 
-public class AuthDAO {
+import model.AuthData;
+
+public interface AuthDAO {
     /*
     Add Auth Data
     Delete Auth Token
@@ -11,18 +13,9 @@ public class AuthDAO {
     Update objects already in the data store
     Delete objects from the data store
      */
-    public void createAuth(){
-        //Create a new authorization.
-    }
-    public void getAuth(){
-        //Retrieve an authorization given an authToken.
-
-        //if auth doesn't exist throw DataAccessException
-
-    }
-    public void deleteAuth(){
-        //Delete an authorization so that it is no longer valid.
-    }
-    public void clearAuths(){}
+    void insertAuth(AuthData authData) throws DataAccessException;
+    AuthData getAuth(String authToken) throws DataAccessException;
+    void deleteAuth(String authToken) throws DataAccessException;
+    void clearAuths() throws DataAccessException;
 
 }
