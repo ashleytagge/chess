@@ -4,13 +4,13 @@ import model.AuthData;
 
 import java.util.HashMap;
 
-public class MemoryAuthDAO {
+public class MemoryAuthDAO implements AuthDAO{
 
     final private HashMap<String, AuthData> auths = new HashMap<>();
 
     public void insertAuth(AuthData authData) throws DataAccessException {
         if(auths.containsKey(authData.authToken())){
-            throw new DataAccessException("Not Authorized");
+            throw new DataAccessException("unauthorized");
         }
         auths.put(authData.authToken(), authData);
     }
@@ -19,7 +19,7 @@ public class MemoryAuthDAO {
         if(auths.containsKey(authToken)){
             return auths.get(authToken);
         }else{
-            throw new DataAccessException("Token does not exist");
+            throw new DataAccessException("unauthorized");
         }
     }
 
@@ -27,11 +27,11 @@ public class MemoryAuthDAO {
         if(auths.containsKey(authToken)){
             auths.remove(authToken);
         }else{
-            throw new DataAccessException("Token does not exist");
+            throw new DataAccessException("bad request");
         }
     }
 
-    public void clearAuths(){
+    public void clear(){
         auths.clear();
     }
 

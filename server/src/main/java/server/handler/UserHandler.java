@@ -1,8 +1,18 @@
 package server.handler;
+import dataaccess.DataAccessException;
+import io.javalin.http.Context;
+import service.UserService;
 
 public class UserHandler {
 
-    public void register(){
+    private final UserService userService;
+
+    public UserHandler(UserService userService){
+        this.userService = userService;
+    }
+
+
+    public void register(Context ctx) throws DataAccessException {
         //Your handlers will convert an HTTP request into Java usable objects & data.
         //The handler then calls the appropriate service.
         /*When the service responds, the handler converts the response
@@ -23,8 +33,8 @@ public class UserHandler {
         * */
     }
 
-    public void login(){}
+    public void login(Context ctx) throws DataAccessException {}
 
-    public void logout(){}
+    public void logout(Context ctx) throws DataAccessException {}
 
 }

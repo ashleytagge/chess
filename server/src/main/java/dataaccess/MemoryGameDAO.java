@@ -2,34 +2,35 @@ package dataaccess;
 
 import model.GameData;
 
+import java.util.Collection;
 import java.util.HashMap;
 
-public class MemoryGameDAO {
+public class MemoryGameDAO implements GameDAO{
 
     final private HashMap<Integer, GameData> games = new HashMap<>();
 
-    void createGame(GameData gameData) throws DataAccessException {
+    public void createGame(GameData gameData) throws DataAccessException {
         games.put(gameData.gameID(), gameData);
     }
 
-    GameData getGame(int gameID) throws DataAccessException {
+    public GameData getGame(int gameID) throws DataAccessException {
         if(games.containsKey(gameID)){
             return games.get(gameID);
         }else{
-            throw new DataAccessException("game does not exist");
+            throw new DataAccessException("bad request");
         }
     }
-    HashMap<Integer, GameData> listGames() {
-        return games;
+    public Collection<GameData> listGames() {
+        return games.values();
     }
-    void updateGame(GameData game) throws DataAccessException {
+    public void updateGame(GameData game) throws DataAccessException {
         if(games.containsKey(game.gameID())){
              games.put(game.gameID(), game);
         }else{
             throw new DataAccessException("bad request");
         }
     }
-    void clearGames() {
+    public void clear() {
         games.clear();
     }
 }

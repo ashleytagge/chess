@@ -46,9 +46,27 @@ public class UserService {
         return new RegisterResult(registerRequest.username(), authToken);
     }
 
-    public LoginResult login(LoginRequest loginRequest) {
-        //if password is incorrect throw 401:UnauthorizedException
-        return new LoginResult("username", "authToken");
+    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
+        if(loginRequest == null || loginRequest.username() == null || loginRequest.password() == null){
+            throw new DataAccessException("unauthorized");
+        }
+
+        UserData user = userDAO.getUser(loginRequest.username());
+
+        if (!user.password().equals(loginRequest.password())) {
+            throw new DataAccessException("bad request");
+        }
+        String token = generateToken();
+        AuthData auth = new AuthData(token, user.username());
+        authDAO.insertAuth(auth);
+
+        return new LoginResult(user.username(), token);
     }
-    public void logout(LogoutRequest logoutRequest) {}
+    public void logout(LogoutRequest logoutRequest) throws DataAccessException {
+        if (logoutRequest == null || logoutRequest.authToken() == null) {
+            throw new DataAccessException("bad request");
+        }
+        authDAO.getAuth(logoutRequest.authToken());
+        authDAO.deleteAuth(logoutRequest.authToken());
+    }
 }

@@ -6,19 +6,18 @@ import model.UserData;
 
 import java.util.HashMap;
 
-public class MemoryUserDAO {
+public class MemoryUserDAO implements UserDAO{
 
     final private HashMap<String, UserData> users = new HashMap<>();
 
-    void insertUser(UserData userData) throws DataAccessException {
+    public void insertUser(UserData userData) throws DataAccessException {
         if(users.containsKey(userData.username())){
             throw new DataAccessException("already taken");
         }
         users.put(userData.username(), userData);
     }
 
-    UserData getUser(String username) throws DataAccessException {
-
+    public UserData getUser(String username) throws DataAccessException {
         if(users.containsKey(username)){
             return users.get(username);
         }else{
@@ -26,7 +25,7 @@ public class MemoryUserDAO {
         }
     }
 
-    void clearUsers() throws DataAccessException {
+    public void clear() throws DataAccessException {
         users.clear();
     }
 
