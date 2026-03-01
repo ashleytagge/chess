@@ -21,7 +21,7 @@ public class MemoryUserDAO implements UserDAO{
         if(users.containsKey(username)){
             return users.get(username);
         }else{
-            throw new DataAccessException("bad request");
+            throw new DataAccessException("unauthorized");
         }
     }
 

@@ -54,7 +54,7 @@ public class UserService {
         UserData user = userDAO.getUser(loginRequest.username());
 
         if (!user.password().equals(loginRequest.password())) {
-            throw new DataAccessException("bad request");
+            throw new DataAccessException("unauthorized");
         }
         String token = generateToken();
         AuthData auth = new AuthData(token, user.username());

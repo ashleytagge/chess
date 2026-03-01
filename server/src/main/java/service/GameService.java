@@ -74,11 +74,13 @@ public class GameService {
                 throw new DataAccessException("already taken");
             }
             game = new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), game.game());
-        }else{
+        }else if (joinGameRequest.playerColor().equals("BLACK")){
             if(game.blackUsername() != null){
                 throw new DataAccessException("already taken");
             }
             game = new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), game.game());
+        }else{
+            throw new DataAccessException("bad request");
         }
         gameDAO.updateGame(game);
         return new JoinGameResult();

@@ -17,8 +17,8 @@ public class ClearHandler {
     public void clearApp(Context ctx) throws DataAccessException {
 
         clearService.clear();
-        ctx.status(200);
         ctx.contentType("application/json");
+        ctx.status(200);
         ctx.result(new Gson().toJson(Map.of()));
     }
 
