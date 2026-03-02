@@ -55,7 +55,8 @@ public class GameService {
         //authorize the user here
         authDAO.getAuth(createGameRequest.authToken());
         //GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game)
-        int gameID = generateGameID();
+        int gameID = 0;
+        gameID = generateGameID();
         ChessGame newGame = new ChessGame();
         GameData newGameData = new GameData(gameID, null, null, createGameRequest.gameName(), newGame);
         gameDAO.createGame(newGameData);
