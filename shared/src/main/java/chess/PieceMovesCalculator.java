@@ -230,12 +230,38 @@ public class PieceMovesCalculator {
         //return moves
         return validMoves;
     }
+
+    private static Collection<ChessMove> capturePawn(
+            ChessPiece piece,
+            ChessBoard board,
+            ChessPosition myPosition,
+            Collection<ChessMove> validMoves,
+            int targetRow,
+            int targetCol,
+            int promotionRow) {
+
+        if(targetCol >= 1 && targetCol <= 8 && targetRow >= 1 && targetRow <= 8){
+            ChessPosition tempPosition = new ChessPosition(targetRow, targetCol);
+            ChessPiece tempPiece = board.getPiece(tempPosition);
+
+            if (tempPiece != null && tempPiece.getTeamColor() != piece.getTeamColor()) {
+                if(targetRow == promotionRow){
+                    validMoves = RepeatedMoves.addPromotionPiece(myPosition, tempPosition, validMoves);
+                } else {
+                    validMoves.add(new ChessMove(myPosition, tempPosition, null));
+                }
+            }
+        }
+
+        return validMoves;
+    }
+
     public static Collection<ChessMove> pawnMove(ChessPiece piece, ChessBoard board, ChessPosition myPosition){
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         ChessGame.TeamColor teamColor = piece.getTeamColor();
         Collection<ChessMove> validMoves = new ArrayList<>();
-        //if team color is BLACK and row == 7 (first turn)
+
         if(teamColor == ChessGame.TeamColor.BLACK){
             if(row == 7) {
                 int n = 1;
@@ -249,18 +275,8 @@ public class PieceMovesCalculator {
                     }
                     n += 1;
                 }
-                if(col - 1 >= 1){
-                    ChessPosition tempPosition2 = new ChessPosition(row - 1, col - 1);
-                    ChessPiece tempPiece2 = board.getPiece(tempPosition2);
-                    if (tempPiece2 != null && tempPiece2.getTeamColor() != teamColor) {
-                        validMoves.add(new ChessMove(myPosition, tempPosition2, null));
-                    }}
-                if(col + 1 <= 8){
-                    ChessPosition tempPosition3 = new ChessPosition(row - 1, col + 1);
-                    ChessPiece tempPiece3 = board.getPiece(tempPosition3);
-                    if (tempPiece3 != null && tempPiece3.getTeamColor() != teamColor) {
-                        validMoves.add(new ChessMove(myPosition, tempPosition3, null));
-                    }}
+                validMoves = capturePawn(piece, board, myPosition, validMoves, row - 1, col - 1, 1);
+                validMoves = capturePawn(piece, board, myPosition, validMoves, row - 1, col + 1, 1);
             }else{
                 if(row - 1 >= 1){
                     ChessPosition tempPosition = new ChessPosition(row - 1, col);
@@ -269,24 +285,10 @@ public class PieceMovesCalculator {
                         validMoves.add(new ChessMove(myPosition, tempPosition, null));
                     }else if(tempPiece == null){
                         validMoves = RepeatedMoves.addPromotionPiece(myPosition, tempPosition, validMoves);
-                    }}
-                if(row -1 >= 1 && col - 1 >= 1){
-                    ChessPosition tempPosition2 = new ChessPosition(row - 1, col - 1);
-                    ChessPiece tempPiece2 = board.getPiece(tempPosition2);
-                    if (tempPiece2 != null && tempPiece2.getTeamColor() != teamColor && row - 1 != 1) {
-                        validMoves.add(new ChessMove(myPosition, tempPosition2, null));
-                    }else if(tempPiece2 != null && tempPiece2.getTeamColor() != teamColor){
-                        validMoves = RepeatedMoves.addPromotionPiece(myPosition, tempPosition2, validMoves);
-                    }}
-                if(row-1 >= 1 && col + 1 <= 8){
-                    ChessPosition tempPosition3 = new ChessPosition(row - 1, col + 1);
-                    ChessPiece tempPiece3 = board.getPiece(tempPosition3);
-                    if (tempPiece3 != null && tempPiece3.getTeamColor() != teamColor && row - 1 != 1) {
-                        validMoves.add(new ChessMove(myPosition, tempPosition3, null));
-                    }else if(tempPiece3 != null && tempPiece3.getTeamColor() != teamColor){
-                        validMoves = RepeatedMoves.addPromotionPiece(myPosition, tempPosition3, validMoves);
                     }
                 }
+                validMoves = capturePawn(piece, board, myPosition, validMoves, row - 1, col - 1, 1);
+                validMoves = capturePawn(piece, board, myPosition, validMoves, row - 1, col + 1, 1);
             }
         }else{
             if (row == 2) {
@@ -301,18 +303,9 @@ public class PieceMovesCalculator {
                     }
                     n += 1;
                 }
-                if(col + 1 <=8){
-                    ChessPosition tempPosition2 = new ChessPosition(row + 1, col + 1);
-                    ChessPiece tempPiece2 = board.getPiece(tempPosition2);
-                    if (tempPiece2 != null && tempPiece2.getTeamColor() != teamColor) {
-                        validMoves.add(new ChessMove(myPosition, tempPosition2, null));
-                    }}
-                if(col - 1 >= 1){
-                    ChessPosition tempPosition3 = new ChessPosition(row + 1, col - 1);
-                    ChessPiece tempPiece3 = board.getPiece(tempPosition3);
-                    if (tempPiece3 != null && tempPiece3.getTeamColor() != teamColor) {
-                        validMoves.add(new ChessMove(myPosition, tempPosition3, null));
-                    }}
+                validMoves = capturePawn(piece, board, myPosition, validMoves, row + 1, col - 1, 8);
+                validMoves = capturePawn(piece, board, myPosition, validMoves, row + 1, col + 1, 8);
+
             } else {
                 if(row + 1 <= 8){
                     ChessPosition tempPosition = new ChessPosition(row + 1, col);
@@ -321,23 +314,10 @@ public class PieceMovesCalculator {
                         validMoves = RepeatedMoves.addPromotionPiece(myPosition, tempPosition, validMoves);
                     }else if(tempPiece  == null){
                         validMoves.add(new ChessMove(myPosition, tempPosition, null));
-                    }}
-                if(col - 1 >= 1 && row + 1 <= 8){
-                    ChessPosition tempPosition2 = new ChessPosition(row + 1, col - 1);
-                    ChessPiece tempPiece2 = board.getPiece(tempPosition2);
-                    if (tempPiece2 != null && tempPiece2.getTeamColor() != teamColor && row + 1 == 8) {
-                        validMoves = RepeatedMoves.addPromotionPiece(myPosition, tempPosition2, validMoves);
-                    }else if (tempPiece2 != null && tempPiece2.getTeamColor() != teamColor){
-                        validMoves.add(new ChessMove(myPosition, tempPosition2, null));
-                    }}
-                if(col + 1 <= 8 && row + 1 <= 8){
-                    ChessPosition tempPosition3 = new ChessPosition(row + 1, col + 1);
-                    ChessPiece tempPiece3 = board.getPiece(tempPosition3);
-                    if(tempPiece3 != null && tempPiece3.getTeamColor() != teamColor && row + 1 == 8) {
-                        validMoves = RepeatedMoves.addPromotionPiece(myPosition, tempPosition3, validMoves);
-                    }else if(tempPiece3 != null && tempPiece3.getTeamColor() != teamColor){
-                        validMoves.add(new ChessMove(myPosition, tempPosition3, null));
-                    }}
+                    }
+                }
+                validMoves = capturePawn(piece, board, myPosition, validMoves, row + 1, col - 1, 8);
+                validMoves = capturePawn(piece, board, myPosition, validMoves, row + 1, col + 1, 8);
             }
         }
         return validMoves;

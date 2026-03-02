@@ -30,14 +30,8 @@ public class ChessGame {
     }
 
      // Gets a valid moves for a piece at the given location
-     // startPosition
 
     private boolean inDangerOfCheck(ChessMove move){
-        //create deep copy of board so I can check it without altering the og
-        // One such method is to have ChessBoard implement Cloneable,
-        // then in the override clone method, you loop through the 2d ChessPiece array,
-        // and do Arrays.copyOf to copy the chess board row by row, then finally putting
-        // the 2d array into the cloned ChessBoard.
         ChessBoard tempBoard = board.clone();
         ChessPosition kingPosition = null;
 
@@ -65,7 +59,6 @@ public class ChessGame {
             }
         }
         //get the valid moves lists for the opposing teams pieces that would
-        //capture the king after this move piece
         Collection<ChessMove> opponentMoves = new ArrayList <>();
         for(int row = 1; row < 9; row++){
             for(int col = 1; col < 9; col++){
@@ -78,7 +71,6 @@ public class ChessGame {
                 }
             }
         }
-        //if the kings pos is in list of capture moves return true
         for(ChessMove elem : opponentMoves){
             if(elem.getEndPosition().equals(kingPosition)){
                 return true;
@@ -95,7 +87,6 @@ public class ChessGame {
         * A move is valid if it is a "piece move" for the piece
         * at the input location and making that move would not
         * leave the team’s king in danger of check.*/
-        //to remove from a collection use .hasnext, .next iterator, and the .remove
         Collection<ChessMove> validMovesList;
         ChessPiece piece = board.getPiece(startPosition); //does this need to be from the copied board?
         if(piece == null){
@@ -203,7 +194,7 @@ public class ChessGame {
                 }
             }
         }
-        //if the kings pos is in list of capture moves return true
+        //if the kings position is in list of capture moves return true
         for(ChessMove elem : opponentMoves){
             if(elem.getEndPosition().equals(king)){
                 return true;
@@ -234,21 +225,13 @@ public class ChessGame {
         //Returns true if the given team has no way to protect their king from being captured.
         if(isInCheck(teamColor)){
             return hasNoMove(teamColor);
-            //if you get all the way through that loop return true;
         }
         return false;
-
-        //if in check
-        //get all valid moves for the pieces on the board, try all the moves for each piece
-        //if the king is still in check after then it is in checkmate and return true
-        //otherwise return false
     }
 
     public boolean isInStalemate(TeamColor teamColor) {
-        //Returns true if the given team has no legal moves but their king is not in immediate danger.
         if(!isInCheck(teamColor)) {
             return hasNoMove(teamColor);
-            //if you get all the way through that loop return true;
         }
         return false;
 
