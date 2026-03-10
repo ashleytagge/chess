@@ -1,5 +1,6 @@
 package dataaccess;
 
+import com.google.gson.Gson;
 import model.UserData;
 
 import java.sql.Connection;
@@ -19,8 +20,25 @@ public class MySQLUserDAO implements UserDAO{
 
         throws DataAccessException;}
 
-    public UserData getUser(String username){
-        throws DataAccessException;}
+    public UserData getUser(String username) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username, passowrd, email FROM user WHERE username=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                       String user = rs.getString("username");
+                       String password = rs.getString("password");
+                       String email = rs.getString("email");
+                       return new UserData(user, password, email);
+                    }else{
+                        throw new DataAccessException("unauthorized");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("unable to read data");
+        }
+    }
 
     public void clear() throws DataAccessException {
         var statement = "TRUNCATE user";
