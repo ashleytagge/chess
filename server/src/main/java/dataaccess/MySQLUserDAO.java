@@ -16,13 +16,16 @@ public class MySQLUserDAO implements UserDAO{
     }
 
     public void insertUser(UserData user){
+
         throws DataAccessException;}
 
     public UserData getUser(String username){
         throws DataAccessException;}
 
-    public void clear(){
-        throws DataAccessException;}
+    public void clear() throws DataAccessException {
+        var statement = "TRUNCATE user";
+            executeUpdate(statement);
+    }
 
     private void executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
