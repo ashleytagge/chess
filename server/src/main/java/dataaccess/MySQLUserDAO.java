@@ -24,6 +24,7 @@ public class MySQLUserDAO implements UserDAO{
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username, passowrd, email FROM user WHERE username=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                        String user = rs.getString("username");
