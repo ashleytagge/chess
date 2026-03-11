@@ -3,10 +3,8 @@ package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -18,11 +16,11 @@ public class MySQLGameDAO implements GameDAO{
         configureDatabase();
     }
 
-    public void createGame(GameData gameData) throws DataAccessException {
+    public int createGame(GameData gameData) throws DataAccessException {
         //GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game)
-        var statement = "INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
+        var statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
         String json = new Gson().toJson(gameData.game());
-        executeUpdate(statement, gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), json);
+        return executeUpdate(statement, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), json);
     }
 
     public GameData getGame(int gameID) throws DataAccessException {
@@ -83,9 +81,9 @@ public class MySQLGameDAO implements GameDAO{
         executeUpdate(statement);
     }
 
-    private void executeUpdate(String statement, Object... params) throws DataAccessException {
+    private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+            try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);) {
                 for (int i = 0; i < params.length; i++) {
                     Object param = params[i];
                     if (param instanceof String p) ps.setString(i + 1, p);
@@ -93,6 +91,13 @@ public class MySQLGameDAO implements GameDAO{
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 ps.executeUpdate();
+
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+
+                return 0;
             }
         } catch (SQLException e) {
             throw new DataAccessException("unable to update database: " + e.getMessage());
@@ -102,11 +107,11 @@ public class MySQLGameDAO implements GameDAO{
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  game (
-              `gameID` INT NOT NULL,
+              `gameID` INT NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(256) NOT NULL,
               `blackUsername` varchar(256) NOT NULL,
               `gameName` varchar(256) NOT NULL,
-              `game` varchar(256) NOT NULL,
+              `game` TEXT NOT NULL,
               PRIMARY KEY (`gameID`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """

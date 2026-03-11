@@ -9,8 +9,9 @@ public class MemoryGameDAO implements GameDAO{
 
     final private HashMap<Integer, GameData> games = new HashMap<>();
 
-    public void createGame(GameData gameData) throws DataAccessException {
+    public int createGame(GameData gameData) throws DataAccessException {
         games.put(gameData.gameID(), gameData);
+        return gameData.gameID();
     }
 
     public GameData getGame(int gameID) throws DataAccessException {

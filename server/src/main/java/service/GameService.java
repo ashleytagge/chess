@@ -55,12 +55,10 @@ public class GameService {
         //authorize the user here
         authDAO.getAuth(createGameRequest.authToken());
         //GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game)
-        int gameID = 0;
-        gameID = generateGameID();
         ChessGame newGame = new ChessGame();
-        GameData newGameData = new GameData(gameID, null, null, createGameRequest.gameName(), newGame);
-        gameDAO.createGame(newGameData);
-        return new CreateGameResult(gameID);
+        GameData newGameData = new GameData(0, null, null, createGameRequest.gameName(), newGame);
+        int generatedID = gameDAO.createGame(newGameData);
+        return new CreateGameResult(generatedID);
     }
     public JoinGameResult joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
         AuthData auth = authDAO.getAuth(joinGameRequest.authToken());
