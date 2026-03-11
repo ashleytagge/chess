@@ -18,7 +18,7 @@ public class Server {
     private final Javalin javalin;
 
     public Server(){
-        this(new MemoryUserDAO(), new MemoryGameDAO(), new MemoryAuthDAO());
+        this(new MySQLUserDAO(), new MySQLGameDAO(), new MySQLAuthDAO());
     }
 
     public Server(UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO) {
