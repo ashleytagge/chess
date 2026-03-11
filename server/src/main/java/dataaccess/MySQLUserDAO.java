@@ -11,7 +11,7 @@ import static java.sql.Types.NULL;
 public class MySQLUserDAO implements UserDAO{
 
     public MySQLUserDAO() throws DataAccessException {
-        configureDatabase();
+        configureUserDatabase();
     }
 
     public void insertUser(UserData user) throws DataAccessException {
@@ -61,18 +61,7 @@ public class MySQLUserDAO implements UserDAO{
         }
     }
 
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS  user (
-              `username` varchar(256) NOT NULL,
-              `password` varchar(256) NOT NULL,
-              `email` varchar(256) NOT NULL,
-              PRIMARY KEY (`username`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
-    };
-
-    private void configureDatabase() throws DataAccessException {
+    private void configureUserDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (Connection conn = DatabaseManager.getConnection()) {
             for (String statement : createStatements) {
@@ -84,4 +73,15 @@ public class MySQLUserDAO implements UserDAO{
             throw new DataAccessException("unable to update database: " + e.getMessage());
         }
     }
+
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS  user (
+              `username` varchar(256) NOT NULL,
+              `password` varchar(256) NOT NULL,
+              `email` varchar(256) NOT NULL,
+              PRIMARY KEY (`username`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+    };
 }
