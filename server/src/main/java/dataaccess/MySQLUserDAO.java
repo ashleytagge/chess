@@ -1,8 +1,6 @@
 package dataaccess;
 
-import com.google.gson.Gson;
 import model.UserData;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,13 +14,14 @@ public class MySQLUserDAO implements UserDAO{
         configureDatabase();
     }
 
-    public void insertUser(UserData user){
-
-        throws DataAccessException;}
+    public void insertUser(UserData user) throws DataAccessException {
+        var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
+        executeUpdate(statement, user.username(), user.password(), user.email());
+        }
 
     public UserData getUser(String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username, passowrd, email FROM user WHERE username=?";
+            var statement = "SELECT username, password, email FROM user WHERE username=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -36,8 +35,8 @@ public class MySQLUserDAO implements UserDAO{
                     }
                 }
             }
-        } catch (Exception e) {
-            throw new DataAccessException("unable to read data");
+        } catch (SQLException e) {
+            throw new DataAccessException("unable to update database: " + e.getMessage());
         }
     }
 
@@ -58,7 +57,7 @@ public class MySQLUserDAO implements UserDAO{
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("unable to update database");
+            throw new DataAccessException("unable to update database: " + e.getMessage());
         }
     }
 
@@ -81,8 +80,8 @@ public class MySQLUserDAO implements UserDAO{
                     preparedStatement.executeUpdate();
                 }
             }
-        } catch (SQLException ex) {
-            throw new DataAccessException("unable to update database");
+        } catch (SQLException e) {
+            throw new DataAccessException("unable to update database: " + e.getMessage());
         }
     }
 }
