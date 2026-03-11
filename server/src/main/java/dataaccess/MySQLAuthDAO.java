@@ -12,7 +12,7 @@ import static java.sql.Types.NULL;
 public class MySQLAuthDAO implements AuthDAO{
 
     public MySQLAuthDAO() throws DataAccessException {
-        configureDatabase();
+        configureAuthDatabase();
     }
 
     public void insertAuth(AuthData auth) throws DataAccessException {
@@ -66,7 +66,7 @@ public class MySQLAuthDAO implements AuthDAO{
         }
     }
 
-    private final String[] createStatements = {
+    private final String[] createAuthStatements = {
             """
             CREATE TABLE IF NOT EXISTS  auth (
               `authToken` varchar(256) NOT NULL,
@@ -76,10 +76,10 @@ public class MySQLAuthDAO implements AuthDAO{
             """
     };
 
-    private void configureDatabase() throws DataAccessException {
+    private void configureAuthDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
+            for (String statement : createAuthStatements) {
                 try (var preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
                 }

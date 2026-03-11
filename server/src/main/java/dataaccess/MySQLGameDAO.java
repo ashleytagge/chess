@@ -13,7 +13,7 @@ import static java.sql.Types.NULL;
 public class MySQLGameDAO implements GameDAO{
 
     public MySQLGameDAO() throws DataAccessException {
-        configureDatabase();
+        configureGameDatabase();
     }
 
     public int createGame(GameData gameData) throws DataAccessException {
@@ -117,7 +117,7 @@ public class MySQLGameDAO implements GameDAO{
             """
     };
 
-    private void configureDatabase() throws DataAccessException {
+    private void configureGameDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (Connection conn = DatabaseManager.getConnection()) {
             for (String statement : createStatements) {
