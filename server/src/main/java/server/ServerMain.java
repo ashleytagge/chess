@@ -2,6 +2,9 @@ package server;
 
 import chess.*;
 import dataaccess.*;
+import service.ClearService;
+import service.GameService;
+import service.UserService;
 
 public class ServerMain {
 
@@ -24,6 +27,10 @@ public class ServerMain {
                 gameDAO = new MySQLGameDAO();
                 authDAO = new MySQLAuthDAO();
             }
+
+            var userService = new UserService(userDAO, authDAO);
+            var gameService = new GameService(userDAO, authDAO, gameDAO);
+            var clearService = new ClearService(userDAO, authDAO,gameDAO);
 
             Server server = new Server(userDAO, gameDAO, authDAO);
             server.run(port);
