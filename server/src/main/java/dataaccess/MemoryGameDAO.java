@@ -23,6 +23,7 @@ public class MemoryGameDAO implements GameDAO{
     public Collection<GameData> listGames() {
         return games.values();
     }
+
     public void updateGame(GameData game) throws DataAccessException {
         if(games.containsKey(game.gameID())){
              games.put(game.gameID(), game);
@@ -30,6 +31,7 @@ public class MemoryGameDAO implements GameDAO{
             throw new DataAccessException("bad request");
         }
     }
+
     public void clear() {
         games.clear();
     }
