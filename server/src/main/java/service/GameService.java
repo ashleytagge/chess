@@ -16,10 +16,6 @@ import service.result.ListGamesResult;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-
-import static service.GenerateGameID.generateGameID;
 
 public class GameService {
     /*

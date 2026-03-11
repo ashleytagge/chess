@@ -8,7 +8,6 @@ import service.request.*;
 import service.result.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static service.GenerateGameID.generateGameID;
 
 public class GameServiceTests {
     //register
