@@ -36,7 +36,7 @@ public class MySQLUserDAO implements UserDAO{
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException("unable to update database: " + e.getMessage());
+            throw new DataAccessException("unable to read database: " + e.getMessage());
         }
     }
 
