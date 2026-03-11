@@ -10,6 +10,7 @@ import service.request.RegisterRequest;
 import service.result.LoginResult;
 import service.result.RegisterResult;
 import dataaccess.DataAccessException;
+import org.mindrot.jbcrypt.BCrypt;
 
 import static service.GenerateToken.generateToken;
 
@@ -33,8 +34,10 @@ public class UserService {
         if(registerRequest == null || registerRequest.email() == null || registerRequest.username() == null || registerRequest.password() == null){
             throw new DataAccessException("bad request");
         }
+        //hash the password
+        String hashedPassword = BCrypt.hashpw(registerRequest.password(), BCrypt.gensalt());
         //create the user
-        UserData user = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
+        UserData user = new UserData(registerRequest.username(), hashedPassword, registerRequest.email());
         //add the info and check if username already exists and throw if it does
         userDAO.insertUser(user);
         //create auth
@@ -53,7 +56,7 @@ public class UserService {
 
         UserData user = userDAO.getUser(loginRequest.username());
 
-        if (!user.password().equals(loginRequest.password())) {
+        if (!BCrypt.checkpw(loginRequest.password(), user.password())) {
             throw new DataAccessException("unauthorized");
         }
         String token = generateToken();

@@ -18,7 +18,31 @@ public class Server {
     private final Javalin javalin;
 
     public Server(){
-        this(new MySQLUserDAO(), new MySQLGameDAO(), new MySQLAuthDAO());
+        this(sqlUserDAO(), sqlGameDAO(), sqlAuthDAO());
+    }
+
+    private static UserDAO sqlUserDAO() {
+        try {
+            return new MySQLUserDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static GameDAO sqlGameDAO() {
+        try {
+            return new MySQLGameDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static AuthDAO sqlAuthDAO() {
+        try {
+            return new MySQLAuthDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Server(UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO) {
