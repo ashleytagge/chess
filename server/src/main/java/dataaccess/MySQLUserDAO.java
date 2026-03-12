@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 import static java.sql.Types.NULL;
 
-public class MySQLUserDAO implements UserDAO{
+public class MySQLUserDAO extends MySQLBaseDAO implements UserDAO{
 
     public MySQLUserDAO() throws DataAccessException {
         configureUserDatabase();
@@ -43,22 +43,6 @@ public class MySQLUserDAO implements UserDAO{
     public void clear() throws DataAccessException {
         var statement = "TRUNCATE user";
             executeUpdate(statement);
-    }
-
-    private void executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    if (param instanceof String p){ ps.setString(i + 1, p); }
-                    else if (param instanceof Integer p) { ps.setInt(i + 1, p); }
-                    else if (param == null) { ps.setNull(i + 1, NULL); }
-                }
-                ps.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("unable to update database: " + e.getMessage());
-        }
     }
 
     private void configureUserDatabase() throws DataAccessException {
