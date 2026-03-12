@@ -81,6 +81,18 @@ public class MySQLGameDAO extends MySQLBaseDAO implements GameDAO{
         executeUpdate(statement);
     }
 
+    private void configureGameDatabase() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        try (Connection connection = DatabaseManager.getConnection()) {
+            for (String statement : createStatements) {
+                try (var preparedStatement = connection.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("unable to update database: " + e.getMessage());
+        }
+    }
 
     //var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?";
     private final String[] createStatements = {
@@ -95,17 +107,4 @@ public class MySQLGameDAO extends MySQLBaseDAO implements GameDAO{
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
-
-    private void configureGameDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("unable to update database: " + e.getMessage());
-        }
-    }
 }
