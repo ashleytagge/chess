@@ -81,7 +81,7 @@ public class Server {
             switch (errorMessage) {
                 case "bad request" -> ctx.status(400);
                 case "unauthorized" -> ctx.status(401);
-                case "already taken" -> ctx.status(403);
+                case "already exists", "already taken" -> ctx.status(403);
                 default -> ctx.status(500);
             }
             ctx.contentType("application/json");
