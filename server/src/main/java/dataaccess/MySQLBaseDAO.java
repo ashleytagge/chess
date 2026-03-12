@@ -25,6 +25,9 @@ public abstract class MySQLBaseDAO {
                 return 0;
             }
         } catch (SQLException e) {
+            if (e.getMessage().contains("Duplicate entry")) {
+                throw new DataAccessException("already exists");
+            }
             throw new DataAccessException("unable to update database: " + e.getMessage());
         }
     }
