@@ -18,34 +18,34 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public RegisterResult register(RegisterRequest requestRequest) throws DataAccessException {
+    public RegisterResult register(RegisterRequest requestRequest) throws ResponseException {
         var request = buildRequest("POST", "/user", requestRequest);
         var response = sendRequest(request);
         return handleResponse(response, RegisterResult.class);
     }
-    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
+    public LoginResult login(LoginRequest loginRequest) throws ResponseException {
         var request = buildRequest("POST", "/session", loginRequest);
         var response = sendRequest(request);
         return handleResponse(response, LoginResult.class);
     }
 
-    public LogoutResult logout(LogoutRequest logoutRequest) throws DataAccessException {
+    public LogoutResult logout(LogoutRequest logoutRequest) throws ResponseException {
         var request = buildRequest("DELETE", "/session", logoutRequest);
         var response = sendRequest(request);
         handleResponse(response, LogoutResult.class);
     }
 
-    public ListGamesResult listGames(ListGamesRequest listGamesRequest) throws DataAccessException {
+    public ListGamesResult listGames(ListGamesRequest listGamesRequest) throws ResponseException {
         var request = buildRequest("GET", "/game", listGamesRequest);
         var response = sendRequest(request);
         return handleResponse(response, ListGamesResult.class);
     }
-    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws DataAccessException {
+    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws ResponseException {
         var request = buildRequest("POST", "/game", createGameRequest);
         var response = sendRequest(request);
         handleResponse(response, CreateGameResult.class);
     }
-    public JoinGameResult joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
+    public JoinGameResult joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
         var request = buildRequest("PUT", "/game", joinGameRequest);
         var response = sendRequest(request);
         handleResponse(response, JoinGameResult.class);
