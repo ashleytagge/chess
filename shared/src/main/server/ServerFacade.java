@@ -18,37 +18,37 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public void register(String username, String password, String email) throws DataAccessException {
-        var request = buildRequest("POST", "/user", new RegisterRequest(username, password, email));
+    public RegisterResult register(RegisterRequest requestRequest) throws DataAccessException {
+        var request = buildRequest("POST", "/user", requestRequest);
         var response = sendRequest(request);
         return handleResponse(response, RegisterResult.class);
     }
-    public void login(String username, String password) throws DataAccessException {
-        var request = buildRequest("POST", "/user", new LoginRequest(username, password));
+    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
+        var request = buildRequest("POST", "/session", loginRequest);
         var response = sendRequest(request);
         return handleResponse(response, LoginResult.class);
     }
 
-    public void logout(String authToken) throws DataAccessException {
-        var request = buildRequest("DELETE", "/session", new LogoutRequest(authToken));
+    public LogoutResult logout(LogoutRequest logoutRequest) throws DataAccessException {
+        var request = buildRequest("DELETE", "/session", logoutRequest);
         var response = sendRequest(request);
-        return handleResponse(response, LogoutResult.class);
+        handleResponse(response, LogoutResult.class);
     }
 
-    public void listGames(String authToken) throws DataAccessException {
-        var request = buildRequest("GET", "/game", new ListGameRequest(authToken));
+    public ListGamesResult listGames(ListGamesRequest listGamesRequest) throws DataAccessException {
+        var request = buildRequest("GET", "/game", listGamesRequest);
         var response = sendRequest(request);
         return handleResponse(response, ListGamesResult.class);
     }
-    public void createGame(String authToken, String gameName) throws DataAccessException {
-        var request = buildRequest("POST", "/game", new CreateGameRequest(authToken, gameName));
+    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws DataAccessException {
+        var request = buildRequest("POST", "/game", createGameRequest);
         var response = sendRequest(request);
-        return handleResponse(response, CreateGameResult.class);
+        handleResponse(response, CreateGameResult.class);
     }
-    public void joinGame(String authToken, String playerColor, int gameID) throws DataAccessException {
-        var request = buildRequest("PUT", "/game", new JoinGameRequest(authToken, playerColor, gameID));
+    public JoinGameResult joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
+        var request = buildRequest("PUT", "/game", joinGameRequest);
         var response = sendRequest(request);
-        return handleResponse(response, JoinGameResult.class);
+        handleResponse(response, JoinGameResult.class);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body) {
