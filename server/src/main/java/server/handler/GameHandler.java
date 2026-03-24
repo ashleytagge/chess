@@ -4,13 +4,14 @@ import io.javalin.http.Context;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import model.request.CreateGameRequest;
+import model.request.JoinGameRequest;
+import model.request.ListGamesRequest;
+import model.result.CreateGameResult;
+import model.result.JoinGameResult;
+import model.result.ListGamesResult;
 import service.GameService;
-import service.request.CreateGameRequest;
-import service.request.JoinGameRequest;
-import service.request.ListGamesRequest;
-import service.result.CreateGameResult;
-import service.result.JoinGameResult;
-import service.result.ListGamesResult;
+import model.*;
 
 import java.util.Map;
 
