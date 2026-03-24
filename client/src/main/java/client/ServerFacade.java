@@ -1,15 +1,16 @@
-package server;
+package client;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
-import model.*;
 import model.request.*;
 import model.result.*;
 
-import java.net.*;
-import java.net.http.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 
 public class ServerFacade {
