@@ -1,18 +1,16 @@
 package client;
 
-import chess.*;
 import com.google.gson.Gson;
 import exception.ResponseException;
 
 import java.util.Arrays;
 import java.util.Scanner;
 
-import static UI.EscapeSequences.*;
+import static ui.EscapeSequences.*;
 
-import model.GameData;
 import model.request.*;
 import model.result.*;
-import webSocketMessages.Notification;
+import websocketmessages.Notification;
 
 
 public class ClientMain {
@@ -153,11 +151,6 @@ public class ClientMain {
             }
         }
         System.out.println();
-    }
-
-    public void notify(Notification notification) {
-        System.out.println(SET_TEXT_COLOR_RED + notification.message());
-        printPrompt();
     }
 
     private void printPrompt() {

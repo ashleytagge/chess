@@ -70,17 +70,6 @@ public class MySQLGameDAO extends MySQLBaseDAO implements GameDAO{
         return result;
     }
 
-    public void updateGame(GameData gameData) throws DataAccessException {
-        String json = new Gson().toJson(gameData.game());
-        var statement = "UPDATE game SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID=?";
-        executeUpdate(statement, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), json, gameData.gameID());
-    }
-
-    public void clear() throws DataAccessException {
-        var statement = "TRUNCATE game";
-        executeUpdate(statement);
-    }
-
     private void configureGameDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (Connection connection = DatabaseManager.getConnection()) {
@@ -92,6 +81,17 @@ public class MySQLGameDAO extends MySQLBaseDAO implements GameDAO{
         } catch (SQLException e) {
             throw new DataAccessException("unable to update database: " + e.getMessage());
         }
+    }
+
+    public void updateGame(GameData gameData) throws DataAccessException {
+        String json = new Gson().toJson(gameData.game());
+        var statement = "UPDATE game SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID=?";
+        executeUpdate(statement, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), json, gameData.gameID());
+    }
+
+    public void clear() throws DataAccessException {
+        var statement = "TRUNCATE game";
+        executeUpdate(statement);
     }
 
     //var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?";

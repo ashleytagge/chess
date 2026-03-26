@@ -19,7 +19,7 @@ public class ServerFacadeTests {
     private static ServerFacade facade;
     private static int port;
 
-    private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
     @BeforeAll
     public static void init() {
@@ -40,7 +40,7 @@ public class ServerFacadeTests {
                 .DELETE()
                 .build();
 
-        httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     @Test
