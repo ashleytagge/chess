@@ -25,8 +25,10 @@ public class ServerFacade {
     public RegisterResult register(RegisterRequest registerRequest) throws ResponseException {
         var request = buildRequest("POST", "/user", null, registerRequest);
         var response = sendRequest(request);
+        System.out.print(response);
         return handleResponse(response, RegisterResult.class);
     }
+
     public LoginResult login(LoginRequest loginRequest) throws ResponseException {
         var request = buildRequest("POST", "/session", null, loginRequest);
         var response = sendRequest(request);
@@ -83,28 +85,26 @@ public class ServerFacade {
         try {
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+            ex.printStackTrace();
+            throw new ResponseException(ResponseException.Code.ServerError, ex.toString());
         }
     }
 
     private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
-        var status = response.statusCode();
+        System.out.println("STATUS = " + response.statusCode());
+        System.out.println("BODY = " + response.body());
+
+        int status = response.statusCode();
         if (!isSuccessful(status)) {
             String message = response.body();
-            if (message != null) {
-                var map = new Gson().fromJson(message, java.util.HashMap.class);
-                if (map != null && map.get("message") != null) {
-                    message = map.get("message").toString();
-                }
-            }
             throw new ResponseException(ResponseException.fromHttpStatusCode(status), message);
         }
 
-        if (responseClass != null) {
-            return new Gson().fromJson(response.body(), responseClass);
+        if (responseClass == null) {
+            return null;
         }
 
-        return null;
+        return new Gson().fromJson(response.body(), responseClass);
     }
 
     private boolean isSuccessful(int status) {

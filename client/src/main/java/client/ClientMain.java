@@ -26,8 +26,13 @@ public class ClientMain {
     }
 
     public static void main(String[] args) {
-        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-        System.out.println("♕ 240 Chess Client: " + piece);
+        try {
+            String serverUrl = "http://localhost:8080"; // change if needed
+            ClientMain client = new ClientMain(serverUrl);
+            client.run();
+        } catch (ResponseException e) {
+            System.out.println("Failed to start client: " + e.getMessage());
+        }
     }
 
     //game start
@@ -47,8 +52,10 @@ public class ClientMain {
         ListGamesResult games = server.listGames(request);
         var result = new StringBuilder();
         var gson = new Gson();
-        for (GameData game : games) {
-            result.append(gson.toJson(game)).append('\n');
+        for (ListGamesResult.GameData game : games.games()) {
+            result.append("ID: ").append(game.gameID())
+                    .append(" Name: ").append(game.gameName())
+                    .append('\n');
         }
         return result.toString();
     }
@@ -108,27 +115,32 @@ public class ClientMain {
     }
 
     public String register(String... params) throws ResponseException{
-        assertSignedIn();
         //get the username password and email from the user
+        if (params.length != 3) {
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "Expected: register <USERNAME> <PASSWORD> <EMAIL>");
+        }
+
         String username = params[0];
         String password = params[1];
         String email = params[2];
 
         RegisterRequest request = new RegisterRequest(username, password, email);
         RegisterResult result = server.register(request);
-        state = State.SIGNEDIN;
         this.authToken = result.authToken();
         this.username = username;
-        return result.username() + result.authToken();
+        state = State.SIGNEDIN;
+
+        return String.format("You signed in as %s.", result.username());
     }
 
     public void run() {
-        System.out.println(WHITE_QUEEN + " Welcome to the pet store. Sign in to start." + WHITE_QUEEN);
+        System.out.println(WHITE_QUEEN + " Welcome to 240 chess. Type help to get started." + WHITE_QUEEN);
         System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while (!result.equals("quit")) {
+        while (!"quit".equals(result)) {
             printPrompt();
             String line = scanner.nextLine();
 
