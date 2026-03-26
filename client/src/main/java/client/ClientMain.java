@@ -109,7 +109,7 @@ public class ClientMain {
             state = State.SIGNEDIN;
             return String.format("You signed in as %s.", result.username());
         }
-        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <username>");
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <username> <password>");
     }
 
     public String register(String... params) throws ResponseException{
@@ -134,7 +134,6 @@ public class ClientMain {
 
     public void run() {
         System.out.println(WHITE_QUEEN + " Welcome to 240 chess. Type help to get started." + WHITE_QUEEN);
-        System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
         var result = "";

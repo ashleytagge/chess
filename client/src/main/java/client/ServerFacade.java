@@ -25,7 +25,6 @@ public class ServerFacade {
     public RegisterResult register(RegisterRequest registerRequest) throws ResponseException {
         var request = buildRequest("POST", "/user", null, registerRequest);
         var response = sendRequest(request);
-        System.out.print(response);
         return handleResponse(response, RegisterResult.class);
     }
 
@@ -85,14 +84,12 @@ public class ServerFacade {
         try {
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
             throw new ResponseException(ResponseException.Code.ServerError, ex.toString());
         }
     }
 
     private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
-        System.out.println("STATUS = " + response.statusCode());
-        System.out.println("BODY = " + response.body());
 
         int status = response.statusCode();
         if (!isSuccessful(status)) {
