@@ -1,25 +1,30 @@
 package client;
 
 import chess.*;
-import client.websocket.WebSocketFacade;
+import com.google.gson.Gson;
 import exception.ResponseException;
 
 import java.util.Arrays;
 import java.util.Scanner;
 
-import static UI.EscapeSequences.WHITE_QUEEN;
-import static java.awt.Color.*;
+import static UI.EscapeSequences.*;
+
+import model.GameData;
+import model.request.*;
+import model.result.*;
+import webSocketMessages.Notification;
 
 
 public class ClientMain {
-    private String visitorName = null;
+    private String username = null;
+    private String authToken = null;
+    private String email = null;
+    private String password = null;
     private final ServerFacade server;
-    private final WebSocketFacade ws;
     private State state = State.SIGNEDOUT;
 
     public ClientMain(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
-        ws = new WebSocketFacade(serverUrl, this);
     }
 
     public static void main(String[] args) {
@@ -37,6 +42,73 @@ public class ClientMain {
     //if they are in a game
         //print game play menu
 
+    public String listGames() throws ResponseException {
+        assertSignedIn();
+        //get the authToken
+        ListGamesRequest request = new ListGamesRequest(authToken);
+        ListGamesResult games = server.listGames(request);
+        var result = new StringBuilder();
+        var gson = new Gson();
+        for (GameData game : games) {
+            result.append(gson.toJson(game)).append('\n');
+        }
+        return result.toString();
+    }
+
+    public String logout() throws ResponseException {
+        assertSignedIn();
+        //get authToken
+        //get username
+        server.logout(authToken);
+        state = State.SIGNEDOUT;
+        return String.format("%s left the shop", username);
+    }
+
+    public String createGame(String... params) throws ResponseException{
+        assertSignedIn();
+        //get the authToken
+        CreateGameRequest request = new CreateGameRequest(authToken);
+        CreateGameResult result = server.createGame(request);
+        return String.valueOf(result.gameID());
+    }
+
+    public String joinGame(String... params) throws ResponseException{
+        assertSignedIn();
+        //get gameID and player color from user
+        JoinGameRequest request = new JoinGameRequest(authToken, playerColor, gameID);
+        JoinGameResult result = server.joinGame(request);
+        return String.format("You have successfully joined game: %s as player %s", gameID.toString(), playerColor);
+    }
+
+    public String observeGame(String... params) throws ResponseException{
+        assertSignedIn();
+        assertSignedIn();
+        //get gameID from user
+        //call observe game
+        return String.format("You have successfully joined game: %s as an observer.", gameID.toString());
+    }
+
+    public String login(String... params) throws ResponseException {
+        if (params.length >= 1) {
+            state = State.SIGNEDIN;
+            username = String.join("-", params);
+            //get username and password from the user
+            LoginRequest request = new LoginRequest(username, password);
+            LoginResult result = server.login(request);
+            return String.format("You signed in as %s.", result.username());
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <username>");
+    }
+
+    public String register(String... params) throws ResponseException{
+        assertSignedIn();
+        //get the username password and email from the user
+        RegisterRequest request = new RegisterRequest(username, password, email);
+        RegisterResult result = server.register(request);
+        state = State.SIGNEDIN;
+        return result.username() + result.authToken();
+    }
+
     public void run() {
         System.out.println(WHITE_QUEEN + " Welcome to the pet store. Sign in to start." + WHITE_QUEEN);
         System.out.print(help());
@@ -49,7 +121,7 @@ public class ClientMain {
 
             try {
                 result = eval(line);
-                System.out.print(BLUE + result);
+                System.out.print(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -59,12 +131,12 @@ public class ClientMain {
     }
 
     public void notify(Notification notification) {
-        System.out.println(RED + notification.message());
+        System.out.println(SET_TEXT_COLOR_RED + notification.message());
         printPrompt();
     }
 
     private void printPrompt() {
-        System.out.print("\n" + RESET + ">>> " + GREEN);
+        System.out.print("\n" + RESET + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
 
@@ -74,13 +146,13 @@ public class ClientMain {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "login" -> signIn(params);
-                case "register" -> rescuePet(params);
-                case "list" -> listPets();
-                case "logout" -> signOut();
-                case "create" -> adoptPet(params);
-                case "join" -> adoptAllPets();
-                case "observe" -> observe();
+                case "login" -> login(params);
+                case "register" -> register(params);
+                case "list" -> listGames();
+                case "logout" -> logout();
+                case "create" -> createGame(params);
+                case "join" -> joinGame(params);
+                case "observe" -> observeGame(params);
                 case "quit" -> "quit";
                 default -> help();
             };
