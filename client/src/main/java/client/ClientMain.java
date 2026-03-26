@@ -16,10 +16,8 @@ import webSocketMessages.Notification;
 
 
 public class ClientMain {
-    private String username = null;
     private String authToken = null;
-    private String email = null;
-    private String password = null;
+    private String username = null;
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
 
@@ -45,7 +43,7 @@ public class ClientMain {
     public String listGames() throws ResponseException {
         assertSignedIn();
         //get the authToken
-        ListGamesRequest request = new ListGamesRequest(authToken);
+        ListGamesRequest request = new ListGamesRequest(this.authToken);
         ListGamesResult games = server.listGames(request);
         var result = new StringBuilder();
         var gson = new Gson();
@@ -59,15 +57,19 @@ public class ClientMain {
         assertSignedIn();
         //get authToken
         //get username
-        server.logout(authToken);
+        LogoutRequest request = new LogoutRequest(this.authToken);
+        server.logout(request);
+        this.authToken = null;
+        this.username = null;
         state = State.SIGNEDOUT;
-        return String.format("%s left the shop", username);
+        return "You have logged out";
     }
 
     public String createGame(String... params) throws ResponseException{
         assertSignedIn();
-        //get the authToken
-        CreateGameRequest request = new CreateGameRequest(authToken);
+        //get the gameName
+        String gameName = params[0];
+        CreateGameRequest request = new CreateGameRequest(this.authToken, gameName);
         CreateGameResult result = server.createGame(request);
         return String.valueOf(result.gameID());
     }
@@ -75,26 +77,31 @@ public class ClientMain {
     public String joinGame(String... params) throws ResponseException{
         assertSignedIn();
         //get gameID and player color from user
-        JoinGameRequest request = new JoinGameRequest(authToken, playerColor, gameID);
-        JoinGameResult result = server.joinGame(request);
-        return String.format("You have successfully joined game: %s as player %s", gameID.toString(), playerColor);
+        String playerColor = params[0];
+        String gameID = params[1];
+        JoinGameRequest request = new JoinGameRequest(this.authToken, playerColor, Integer.parseInt(gameID));
+        server.joinGame(request);
+        return String.format("You have successfully joined game: %s as player %s", gameID, playerColor);
     }
 
     public String observeGame(String... params) throws ResponseException{
         assertSignedIn();
         assertSignedIn();
         //get gameID from user
+        String gameID = params[0];
         //call observe game
-        return String.format("You have successfully joined game: %s as an observer.", gameID.toString());
+        return String.format("You have successfully joined game: %s as an observer.", Integer.parseInt(gameID));
     }
 
     public String login(String... params) throws ResponseException {
-        if (params.length >= 1) {
-            state = State.SIGNEDIN;
-            username = String.join("-", params);
-            //get username and password from the user
+        if (params.length == 2) {
+            String username = params[0];
+            String password = params[1];
             LoginRequest request = new LoginRequest(username, password);
             LoginResult result = server.login(request);
+            this.authToken = result.authToken();
+            this.username = username;
+            state = State.SIGNEDIN;
             return String.format("You signed in as %s.", result.username());
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <username>");
@@ -103,9 +110,15 @@ public class ClientMain {
     public String register(String... params) throws ResponseException{
         assertSignedIn();
         //get the username password and email from the user
+        String username = params[0];
+        String password = params[1];
+        String email = params[2];
+
         RegisterRequest request = new RegisterRequest(username, password, email);
         RegisterResult result = server.register(request);
         state = State.SIGNEDIN;
+        this.authToken = result.authToken();
+        this.username = username;
         return result.username() + result.authToken();
     }
 
