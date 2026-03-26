@@ -73,17 +73,25 @@ public class ClientMain {
     public String createGame(String... params) throws ResponseException{
         assertSignedIn();
         //get the gameName
+        if (params.length != 1) {
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "Expected: create <GAMENAME>");
+        }
         String gameName = params[0];
         CreateGameRequest request = new CreateGameRequest(this.authToken, gameName);
         CreateGameResult result = server.createGame(request);
-        return String.valueOf(result.gameID());
+        return String.format("You have successfully created the game: %s. Game ID: %s.", gameName, result.gameID());
     }
 
     public String joinGame(String... params) throws ResponseException{
         assertSignedIn();
         //get gameID and player color from user
-        String playerColor = params[0];
-        String gameID = params[1];
+        if (params.length != 2) {
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "Expected: join <ID> [WHITE|BLACK]");
+        }
+        String gameID = params[0];
+        String playerColor = params[1];
         JoinGameRequest request = new JoinGameRequest(this.authToken, playerColor, Integer.parseInt(gameID));
         server.joinGame(request);
         return String.format("You have successfully joined game: %s as player %s", gameID, playerColor);
@@ -109,7 +117,7 @@ public class ClientMain {
             state = State.SIGNEDIN;
             return String.format("You signed in as %s.", result.username());
         }
-        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <username> <password>");
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: login <username> <password>");
     }
 
     public String register(String... params) throws ResponseException{
@@ -159,8 +167,11 @@ public class ClientMain {
 
     public String eval(String input) {
         try {
-            String[] tokens = input.toLowerCase().split(" ");
-            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] tokens = input.trim().split("\\s+");
+            String cmd = tokens[0].toLowerCase();
+            if (cmd.isEmpty()){
+                cmd = "help";
+            }
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "login" -> login(params);
