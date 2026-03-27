@@ -32,6 +32,7 @@ public class ClientMain {
         } catch (ResponseException e) {
             System.out.println("Failed to start client: " + e.getMessage());
         }
+
     }
 
     public String listGames() throws ResponseException {
