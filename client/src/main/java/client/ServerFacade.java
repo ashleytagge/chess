@@ -28,6 +28,12 @@ public class ServerFacade {
         return handleResponse(response, RegisterResult.class);
     }
 
+    public void clear() throws ResponseException {
+        var request = buildRequest("DELETE", "/db", null, null);
+        var response = sendRequest(request);
+        handleResponse(response, Object.class);
+    }
+
     public LoginResult login(LoginRequest loginRequest) throws ResponseException {
         var request = buildRequest("POST", "/session", null, loginRequest);
         var response = sendRequest(request);

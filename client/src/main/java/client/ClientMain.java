@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 
@@ -10,7 +11,7 @@ import static ui.EscapeSequences.*;
 
 import model.request.*;
 import model.result.*;
-import websocketmessages.Notification;
+import ui.PrintBoard;
 
 
 public class ClientMain {
@@ -33,16 +34,6 @@ public class ClientMain {
         }
     }
 
-    //game start
-    //press help to begin
-    //print not logged in menu
-    //if they are logged in
-        //print logged in menu
-    //if they log out
-        //print not logged in menu
-    //if they are in a game
-        //print game play menu
-
     public String listGames() throws ResponseException {
         assertSignedIn();
         //get the authToken
@@ -51,9 +42,10 @@ public class ClientMain {
         var result = new StringBuilder();
         var gson = new Gson();
         for (ListGamesResult.GameData game : games.games()) {
-            result.append("ID: ").append(game.gameID())
-                    .append(" Name: ").append(game.gameName())
-                    .append('\n');
+            result.append(game.gameID()).append(".")
+                    .append(" Game Name: ").append(game.gameName())
+                    .append(" Players: ").append(game.whiteUsername())
+                    .append(", ").append(game.blackUsername()).append('\n');
         }
         return result.toString();
     }
@@ -67,7 +59,7 @@ public class ClientMain {
         this.authToken = null;
         this.username = null;
         state = State.SIGNEDOUT;
-        return "You have logged out";
+        return "You have withdrawn from the court. May you return in due time.";
     }
 
     public String createGame(String... params) throws ResponseException{
@@ -80,7 +72,7 @@ public class ClientMain {
         String gameName = params[0];
         CreateGameRequest request = new CreateGameRequest(this.authToken, gameName);
         CreateGameResult result = server.createGame(request);
-        return String.format("You have successfully created the game: %s. Game ID: %s.", gameName, result.gameID());
+        return String.format("Match %s. %s has been forged. Step forth and join the battle!", result.gameID(), gameName);
     }
 
     public String joinGame(String... params) throws ResponseException{
@@ -92,18 +84,44 @@ public class ClientMain {
         }
         String gameID = params[0];
         String playerColor = params[1];
+
+        try {
+            int id = Integer.parseInt(gameID);
+        } catch (NumberFormatException e) {
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "Hear ye, hear ye! The game ID must be a number!");
+        }
+        if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")){
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "You must enter your desired player color as 'WHITE' or 'BLACK'.");
+        }
         JoinGameRequest request = new JoinGameRequest(this.authToken, playerColor, Integer.parseInt(gameID));
         server.joinGame(request);
-        return String.format("You have successfully joined game: %s as player %s", gameID, playerColor);
+        if(playerColor.equals("WHITE")){
+            PrintBoard.drawBoard(ChessGame.TeamColor.WHITE);
+        }else{
+            PrintBoard.drawBoard(ChessGame.TeamColor.BLACK);
+        }
+        return String.format("You have joined match %s as %s, Your Majesty. May your moves be wise and your victory swift.", gameID, playerColor);
     }
 
     public String observeGame(String... params) throws ResponseException{
         assertSignedIn();
-        assertSignedIn();
         //get gameID from user
+        if (params.length != 1) {
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "Expected: observe <ID>");
+        }
         String gameID = params[0];
+        try {
+            int id = Integer.parseInt(gameID);
+        } catch (NumberFormatException e) {
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "Hear ye, hear ye! The game ID must be a number!");
+        }
         //call observe game
-        return String.format("You have successfully joined game: %s as an observer.", Integer.parseInt(gameID));
+        PrintBoard.drawBoard(ChessGame.TeamColor.WHITE);
+        return String.format("You now stand as a watcher of match %s. Let the battle commence!.", Integer.parseInt(gameID));
     }
 
     public String login(String... params) throws ResponseException {
@@ -115,7 +133,7 @@ public class ClientMain {
             this.authToken = result.authToken();
             this.username = username;
             state = State.SIGNEDIN;
-            return String.format("You signed in as %s.", result.username());
+            return String.format("You are signed in as %s. Welcome back Your Majesty, your court stands ready.", result.username());
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: login <username> <password>");
     }
@@ -137,11 +155,18 @@ public class ClientMain {
         this.username = username;
         state = State.SIGNEDIN;
 
-        return String.format("You signed in as %s.", result.username());
+        return String.format("You are signed in as %s. Welcome Your Majesty, your court stands ready.", result.username());
+    }
+
+    public String clear() throws ResponseException{
+        server.clear();
+        return "You have successfully cleared the realm";
     }
 
     public void run() {
-        System.out.println(WHITE_QUEEN + " Welcome to 240 chess. Type help to get started." + WHITE_QUEEN);
+        System.out.println(WHITE_QUEEN + SET_TEXT_COLOR_BLUE + " Welcome to the Royal Chess Court" + RESET_TEXT_COLOR + WHITE_QUEEN);
+        System.out.println(SET_TEXT_COLOR_BLUE + "Type 'help' to begin your game, Your Majesty.");
+        System.out.println(SET_TEXT_COLOR_BLUE + "You may type 'help' at any time to review your available commands.");
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -151,7 +176,7 @@ public class ClientMain {
 
             try {
                 result = eval(line);
-                System.out.print(SET_TEXT_COLOR_BLUE + result);
+                System.out.print(SET_TEXT_COLOR_BLUE + result + RESET);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -182,6 +207,7 @@ public class ClientMain {
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
                 case "quit" -> "quit";
+                case "clear" -> clear();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -192,26 +218,30 @@ public class ClientMain {
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
-                    register <USERNAME> <PASSWORD> <EMAIL> - to create an account
-                    login <USERNAME> <PASSWORD> - to play chess
-                    quit - playing chess
-                    help - with possible commands
+                    ♔ The Royal Entrance ♔
+                    register <USERNAME> <PASSWORD> <EMAIL> - to enter the realm
+                    login <USERNAME> <PASSWORD> - to return to your throne
+                    quit - to depart the court
+                    help - to view your available commands
+                    clear - to reset the realm (for testing)
                     """;
         }
         return """
-                create <NAME> - a game
-                list - games
-                join <ID> [WHITE|BLACK] - a game
+                ♔ The Royal Command Menu ♔
+                create <NAME> - to forge a new match
+                list - to view all active matches
+                join <ID> [WHITE|BLACK] - to enter the match as a player
                 observe <ID> - a game
-                logout - when you are done
-                quit - playing chess
-                help - with possible commands
+                logout - to leave the court
+                quit - to depart the court
+                help - to view your available commands
+                clear - to reset the realm (for testing)
                 """;
     }
 
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT) {
-            throw new ResponseException(ResponseException.Code.ClientError, "You must sign in");
+            throw new ResponseException(ResponseException.Code.ClientError, "You must sign in before returning to your throne");
         }
     }
 }
