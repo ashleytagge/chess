@@ -9,9 +9,11 @@ import model.AuthData;
 import model.GameData;
 import model.*;
 import model.request.CreateGameRequest;
+import model.request.GetGameRequest;
 import model.request.JoinGameRequest;
 import model.request.ListGamesRequest;
 import model.result.CreateGameResult;
+import model.result.GetGameResult;
 import model.result.JoinGameResult;
 import model.result.ListGamesResult;
 
@@ -57,6 +59,7 @@ public class GameService {
         int generatedID = gameDAO.createGame(newGameData);
         return new CreateGameResult(generatedID);
     }
+
     public JoinGameResult joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
         AuthData auth = authDAO.getAuth(joinGameRequest.authToken());
         GameData game = gameDAO.getGame(joinGameRequest.gameID());

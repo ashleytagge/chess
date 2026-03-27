@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessBoard;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.request.*;
@@ -56,6 +57,7 @@ public class ServerFacade {
         var response = sendRequest(request);
         return handleResponse(response, CreateGameResult.class);
     }
+
     public JoinGameResult joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
         var request = buildRequest("PUT", "/game", joinGameRequest.authToken(), joinGameRequest);
         var response = sendRequest(request);
@@ -90,7 +92,6 @@ public class ServerFacade {
         try {
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex) {
-            //ex.printStackTrace();
             throw new ResponseException(ResponseException.Code.ServerError, ex.toString());
         }
     }

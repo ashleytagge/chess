@@ -1,29 +1,36 @@
 package ui;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 
 public class PrintBoard {
 
-    private static final String[][] STARTING_BOARD = {
-            {EscapeSequences.BLACK_ROOK, EscapeSequences.BLACK_KNIGHT, EscapeSequences.BLACK_BISHOP, EscapeSequences.BLACK_QUEEN,
-                    EscapeSequences.BLACK_KING, EscapeSequences.BLACK_BISHOP, EscapeSequences.BLACK_KNIGHT, EscapeSequences.BLACK_ROOK},
-            {EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN,
-                    EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN},
-            {EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY,
-                    EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY},
-            {EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY,
-                    EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY},
-            {EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY,
-                    EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY},
-            {EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY,
-                    EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY},
-            {EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN,
-                    EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN},
-            {EscapeSequences.WHITE_ROOK, EscapeSequences.WHITE_KNIGHT, EscapeSequences.WHITE_BISHOP, EscapeSequences.WHITE_QUEEN,
-                    EscapeSequences.WHITE_KING, EscapeSequences.WHITE_BISHOP, EscapeSequences.WHITE_KNIGHT, EscapeSequences.WHITE_ROOK}
-    };
+    private static String pieceToSymbol(ChessPiece piece) {
+        if (piece == null) return EscapeSequences.EMPTY;
 
-    public static void drawBoard(ChessGame.TeamColor playerColor) {
+        return switch (piece.getTeamColor()) {
+            case WHITE -> switch (piece.getPieceType()) {
+                case KING -> EscapeSequences.WHITE_KING;
+                case QUEEN -> EscapeSequences.WHITE_QUEEN;
+                case BISHOP -> EscapeSequences.WHITE_BISHOP;
+                case KNIGHT -> EscapeSequences.WHITE_KNIGHT;
+                case ROOK -> EscapeSequences.WHITE_ROOK;
+                case PAWN -> EscapeSequences.WHITE_PAWN;
+            };
+            case BLACK -> switch (piece.getPieceType()) {
+                case KING -> EscapeSequences.BLACK_KING;
+                case QUEEN -> EscapeSequences.BLACK_QUEEN;
+                case BISHOP -> EscapeSequences.BLACK_BISHOP;
+                case KNIGHT -> EscapeSequences.BLACK_KNIGHT;
+                case ROOK -> EscapeSequences.BLACK_ROOK;
+                case PAWN -> EscapeSequences.BLACK_PAWN;
+            };
+        };
+    }
+
+    public static void drawBoard(ChessBoard board, ChessGame.TeamColor playerColor) {
         boolean whitePerspective = playerColor != ChessGame.TeamColor.BLACK;
 
         System.out.print(EscapeSequences.RESET);
@@ -47,23 +54,27 @@ public class PrintBoard {
                 }
 
                 boolean lightSquare = ((file + rank) % 2 == 1);
-                String piece = STARTING_BOARD[8 - rank][file - 1];
 
                 System.out.print(lightSquare
                         ? EscapeSequences.SET_BG_COLOR_WHITE
                         : EscapeSequences.SET_BG_COLOR_BLACK);
 
-                if (piece.equals(EscapeSequences.WHITE_KING) || piece.equals(EscapeSequences.WHITE_QUEEN)
-                        || piece.equals(EscapeSequences.WHITE_BISHOP) || piece.equals(EscapeSequences.WHITE_KNIGHT)
-                        || piece.equals(EscapeSequences.WHITE_ROOK) || piece.equals(EscapeSequences.WHITE_PAWN)) {
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                } else if (piece.equals(EscapeSequences.BLACK_KING) || piece.equals(EscapeSequences.BLACK_QUEEN)
-                        || piece.equals(EscapeSequences.BLACK_BISHOP) || piece.equals(EscapeSequences.BLACK_KNIGHT)
-                        || piece.equals(EscapeSequences.BLACK_ROOK) || piece.equals(EscapeSequences.BLACK_PAWN)) {
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                ChessPiece piece = board.getPiece(new ChessPosition(rank, file));
+                String symbol = pieceToSymbol(piece);
+
+                System.out.print(lightSquare
+                        ? EscapeSequences.SET_BG_COLOR_WHITE
+                        : EscapeSequences.SET_BG_COLOR_BLACK);
+
+                if (piece != null) {
+                    if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                        System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                    } else {
+                        System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                    }
                 }
 
-                System.out.print(piece);
+                System.out.print(symbol);
                 System.out.print(EscapeSequences.RESET);
             }
 

@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
@@ -19,6 +20,7 @@ public class ClientMain {
     private String username = null;
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
+    private int numGames = 0;
 
     public ClientMain(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
@@ -45,8 +47,8 @@ public class ClientMain {
         for (ListGamesResult.GameData game : games.games()) {
             result.append(game.gameID()).append(".")
                     .append(" Game Name: ").append(game.gameName())
-                    .append(" Players: ").append(game.whiteUsername())
-                    .append(", ").append(game.blackUsername()).append('\n');
+                    .append(", White Player: ").append(game.whiteUsername())
+                    .append(", Black Player: ").append(game.blackUsername()).append('\n');
         }
         return result.toString();
     }
@@ -73,6 +75,7 @@ public class ClientMain {
         String gameName = params[0];
         CreateGameRequest request = new CreateGameRequest(this.authToken, gameName);
         CreateGameResult result = server.createGame(request);
+        numGames = result.gameID();
         return String.format("Match %s. %s has been forged. Step forth and join the battle!", result.gameID(), gameName);
     }
 
@@ -97,13 +100,31 @@ public class ClientMain {
                     "You must enter your desired player color as 'WHITE' or 'BLACK'.");
         }
         JoinGameRequest request = new JoinGameRequest(this.authToken, playerColor, Integer.parseInt(gameID));
-        server.joinGame(request);
-        if(playerColor.equals("WHITE")){
-            PrintBoard.drawBoard(ChessGame.TeamColor.WHITE);
-        }else{
-            PrintBoard.drawBoard(ChessGame.TeamColor.BLACK);
+        try{
+            server.joinGame(request);
+        }catch(Exception e){
+            if (e.getMessage().contains("already taken")){
+                return "Another champion has already claimed that side of the board. Please try again.";
+            }else if (e.getMessage().contains("bad request")){
+                return "Alas- You chose a game that does not exist";
+            }else{
+                System.out.print(e.getMessage());
+            }
         }
+        ChessBoard board = new ChessGame().getBoard();
+        if(playerColor.equals("WHITE")){
+            PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
+        }else{
+            PrintBoard.drawBoard(board, ChessGame.TeamColor.BLACK);
+        }
+        state = State.GAMEPLAY;
         return String.format("You have joined match %s as %s, Your Majesty. May your moves be wise and your victory swift.", gameID, playerColor);
+    }
+
+    public String endGame (){
+        state = State.SIGNEDIN;
+        System.out.println(SET_TEXT_COLOR_BLUE + "You have left the game." + RESET);
+        return "Type 'help' to review your command options, Your Majesty.";
     }
 
     public String observeGame(String... params) throws ResponseException{
@@ -116,12 +137,17 @@ public class ClientMain {
         String gameID = params[0];
         try {
             int id = Integer.parseInt(gameID);
+            if(id > numGames || id < 1){
+                throw new ResponseException(ResponseException.Code.ClientError,
+                        "That game doesn't exist!");
+            }
         } catch (NumberFormatException e) {
             throw new ResponseException(ResponseException.Code.ClientError,
                     "Hear ye, hear ye! The game ID must be a number!");
         }
         //call observe game
-        PrintBoard.drawBoard(ChessGame.TeamColor.WHITE);
+        ChessBoard board = new ChessGame().getBoard();
+        PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
         return String.format("You now stand as a watcher of match %s. Let the battle commence!.", Integer.parseInt(gameID));
     }
 
@@ -130,7 +156,12 @@ public class ClientMain {
             String username = params[0];
             String password = params[1];
             LoginRequest request = new LoginRequest(username, password);
-            LoginResult result = server.login(request);
+            LoginResult result;
+            try {
+                result = server.login(request);
+            }catch(Exception e){
+                return "Incorrect username or password.";
+            }
             this.authToken = result.authToken();
             this.username = username;
             state = State.SIGNEDIN;
@@ -151,7 +182,12 @@ public class ClientMain {
         String email = params[2];
 
         RegisterRequest request = new RegisterRequest(username, password, email);
-        RegisterResult result = server.register(request);
+        RegisterResult result;
+        try {
+            result = server.register(request);
+        }catch(Exception e){
+            return "That username already exists! Please choose a different one.";
+        }
         this.authToken = result.authToken();
         this.username = username;
         state = State.SIGNEDIN;
@@ -161,6 +197,7 @@ public class ClientMain {
 
     public String clear() throws ResponseException{
         server.clear();
+        numGames = 0;
         return "You have successfully cleared the realm";
     }
 
@@ -209,10 +246,11 @@ public class ClientMain {
                 case "observe" -> observeGame(params);
                 case "quit" -> "quit";
                 case "clear" -> clear();
+                case "leave" -> endGame();
                 default -> help();
             };
-        } catch (ResponseException ex) {
-            return ex.getMessage();
+        } catch (Exception e) {
+            return e.getMessage();
         }
     }
 
@@ -222,6 +260,15 @@ public class ClientMain {
                     ♔ The Royal Entrance ♔
                     register <USERNAME> <PASSWORD> <EMAIL> - to enter the realm
                     login <USERNAME> <PASSWORD> - to return to your throne
+                    quit - to depart the court
+                    help - to view your available commands
+                    clear - to reset the realm (for testing)
+                    """;
+        }
+        if (state == State.GAMEPLAY) {
+            return """
+                    ♔ GAMEPLAY MENU ♔
+                    leave - to leave the match and return to the Royal Command Menu
                     quit - to depart the court
                     help - to view your available commands
                     clear - to reset the realm (for testing)

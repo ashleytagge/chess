@@ -60,12 +60,12 @@ public class MySQLUserDAO extends MySQLBaseDAO implements UserDAO{
 
     private final String[] createStatements = {
             """
-            CREATE TABLE IF NOT EXISTS  user (
-              `username` varchar(256) NOT NULL,
-              `password` varchar(256) NOT NULL,
-              `email` varchar(256) NOT NULL,
-              PRIMARY KEY (`username`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
+        CREATE TABLE IF NOT EXISTS user (
+          `username` varchar(256) NOT NULL,
+          `password` varchar(256) NOT NULL,
+          `email` varchar(256) NOT NULL,
+          PRIMARY KEY (`username`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_bin
+        """
     };
 }
