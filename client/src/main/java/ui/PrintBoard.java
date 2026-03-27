@@ -8,7 +8,9 @@ import chess.ChessPosition;
 public class PrintBoard {
 
     private static String pieceToSymbol(ChessPiece piece) {
-        if (piece == null) return EscapeSequences.EMPTY;
+        if (piece == null){
+            return EscapeSequences.EMPTY;
+        }
 
         return switch (piece.getTeamColor()) {
             case WHITE -> switch (piece.getPieceType()) {
