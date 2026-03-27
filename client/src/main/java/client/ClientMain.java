@@ -20,7 +20,6 @@ public class ClientMain {
     private String username = null;
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
-    private int numGames = 0;
 
     public ClientMain(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
@@ -75,7 +74,6 @@ public class ClientMain {
         String gameName = params[0];
         CreateGameRequest request = new CreateGameRequest(this.authToken, gameName);
         CreateGameResult result = server.createGame(request);
-        numGames = result.gameID();
         return String.format("Match %s. %s has been forged. Step forth and join the battle!", result.gameID(), gameName);
     }
 
@@ -137,13 +135,19 @@ public class ClientMain {
         String gameID = params[0];
         try {
             int id = Integer.parseInt(gameID);
-            if(id > numGames || id < 1){
-                throw new ResponseException(ResponseException.Code.ClientError,
-                        "That game doesn't exist!");
-            }
         } catch (NumberFormatException e) {
             throw new ResponseException(ResponseException.Code.ClientError,
                     "Hear ye, hear ye! The game ID must be a number!");
+        }
+        //check if game exists
+        ListGamesRequest request = new ListGamesRequest(this.authToken);
+        ListGamesResult games = server.listGames(request);
+
+        boolean exists = games.games().stream()
+                .anyMatch(game -> game.gameID() == Integer.parseInt(gameID));
+        if (!exists) {
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "That game doesn't exist.");
         }
         //call observe game
         ChessBoard board = new ChessGame().getBoard();
@@ -197,7 +201,6 @@ public class ClientMain {
 
     public String clear() throws ResponseException{
         server.clear();
-        numGames = 0;
         return "You have successfully cleared the realm";
     }
 

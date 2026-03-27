@@ -56,14 +56,14 @@ public class PrintBoard {
                 boolean lightSquare = ((file + rank) % 2 == 1);
 
                 System.out.print(lightSquare
-                        ? EscapeSequences.SET_BG_COLOR_WHITE
+                        ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY
                         : EscapeSequences.SET_BG_COLOR_BLACK);
 
                 ChessPiece piece = board.getPiece(new ChessPosition(rank, file));
                 String symbol = pieceToSymbol(piece);
 
                 System.out.print(lightSquare
-                        ? EscapeSequences.SET_BG_COLOR_WHITE
+                        ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY
                         : EscapeSequences.SET_BG_COLOR_BLACK);
 
                 if (piece != null) {
