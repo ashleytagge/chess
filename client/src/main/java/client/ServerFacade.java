@@ -18,6 +18,7 @@ import java.util.HashMap;
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
+//update with websocket
 
     public ServerFacade(String url) {
         serverUrl = url;

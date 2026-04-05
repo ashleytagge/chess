@@ -14,7 +14,7 @@ import service.UserService;
 import java.util.Map;
 
 public class Server {
-
+//update this class with websocket
     private final Javalin javalin;
 
     public Server(){
