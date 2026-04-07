@@ -63,7 +63,7 @@ public class ClientMain implements ServerMessageObserver {
         //redraw the board
     }
 
-    public void makeMove(String... params) throws ResponseException {
+    public String makeMove(String... params) throws ResponseException {
         /*Allow the user to input what move they want to make. The board is updated to
         reflect the result of the move, and the board automatically updates on all clients involved in the game.
          */
@@ -111,12 +111,32 @@ public class ClientMain implements ServerMessageObserver {
         this.board = game.getBoard();
         ws.makeMove(this.authToken, this.currentGameID, this.username, newMove);
         PrintBoard.drawBoard(board, currentPlayerColor);
+        return "";
     }
 
-    public String resign(String... params){
+    public String leave(String... params) throws ResponseException {
+        ws.leave(authToken, currentGameID, username);
+        ws = null;
+
+        currentGameID = -1;
+        currentPlayerColor = null;
+
+        state = State.SIGNEDIN;
+
+        return "You have left the game.";
+    }
+
+    public String resign(String... params) throws ResponseException {
        /*Prompts the user to confirm they want to resign. If they do, the user forfeits
         the game and the game is over. Does not cause the user to leave the game.*/
-        return "";
+        if (state != State.GAMEPLAY) {
+            throw new ResponseException(ResponseException.Code.ClientError, "You are not inside of a game");
+        }
+        if (currentPlayerColor == null) {
+            return "You are observing this game. Observers can't resign.";
+        }
+        ws.resign(authToken, currentGameID, username);
+        return "You have sent in your resignation";
     }
 
     //these methods need to send websocket messages from client to server and vice versa. those messages should
