@@ -1,20 +1,22 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
+import chess.*;
 import client.websocket.ServerMessageObserver;
 import client.websocket.WebSocketCommunicator;
 import com.google.gson.Gson;
 import exception.ResponseException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
+import jakarta.websocket.Session;
 import model.request.*;
 import model.result.*;
 import ui.PrintBoard;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -25,9 +27,14 @@ import websocket.messages.ServerMessage;
 public class ClientMain implements ServerMessageObserver {
     private String authToken = null;
     private String username = null;
-    private final WebSocketCommunicator ws;
+    private WebSocketCommunicator ws;
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
+    private ChessGame game = new ChessGame();
+    private ChessBoard board = game.getBoard();
+    private int currentGameID;
+    ChessGame.TeamColor currentPlayerColor;
+
 
     public ClientMain(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
@@ -42,9 +49,13 @@ public class ClientMain implements ServerMessageObserver {
         }
     }
 
-    public void displayNotification(String message){}
+    public void displayNotification(String... params){
 
-    public void displayError(String message){}
+    }
+
+    public void displayError(String... params){
+
+    }
 
     public void loadGame(Object game){
         //deserialize the game object
@@ -52,6 +63,77 @@ public class ClientMain implements ServerMessageObserver {
         //redraw the board
     }
 
+    public void makeMove(String... params) throws ResponseException {
+        /*Allow the user to input what move they want to make. The board is updated to
+        reflect the result of the move, and the board automatically updates on all clients involved in the game.
+         */
+        //get move from user "Enter start position, end position, and promotion peice if applicable
+        //create new chessmove
+        if (params.length != 6) {
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "Expected: move <start row> <start column> <end row> <end column> <promotion piece>");
+        }
+
+        int startPosRow = Integer.parseInt(params[1]);
+        int startPosCol = Integer.parseInt(params[2]);
+        int endPosRow = Integer.parseInt(params[3]);
+        int endPosCol = Integer.parseInt(params[4]);
+
+        ChessPiece.PieceType promotionPiece = null;
+
+        if(params[5] != null) {
+            if (params[5].equalsIgnoreCase("queen")) {
+                promotionPiece = ChessPiece.PieceType.QUEEN;
+            } else if (params[5].equalsIgnoreCase("bishop")) {
+                promotionPiece = ChessPiece.PieceType.BISHOP;
+            } else if (params[5].equalsIgnoreCase("rook")) {
+                promotionPiece = ChessPiece.PieceType.ROOK;
+            } else if (params[5].equalsIgnoreCase("knight")) {
+                promotionPiece = ChessPiece.PieceType.KNIGHT;
+            } else {
+                throw new ResponseException(ResponseException.Code.ClientError,
+                        "error: invalid promotion piece. Expected: [null|queen|bishop|rook|knight]");
+            }
+        }
+
+        ChessPosition startPosition = new ChessPosition(startPosRow,startPosCol);
+        ChessPosition endPosition = new ChessPosition(endPosRow, startPosCol);
+
+        ChessMove newMove = new ChessMove(startPosition, endPosition, promotionPiece);
+
+        try{
+            game.makeMove(newMove);
+        }catch(Exception ex){
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "That move is invalid");
+        }
+
+        this.board = game.getBoard();
+        ws.makeMove(this.authToken, this.currentGameID, this.username, newMove);
+        PrintBoard.drawBoard(board, currentPlayerColor);
+    }
+
+    public String resign(String... params){
+       /*Prompts the user to confirm they want to resign. If they do, the user forfeits
+        the game and the game is over. Does not cause the user to leave the game.*/
+        return "";
+    }
+
+    //these methods need to send websocket messages from client to server and vice versa. those messages should
+    //be CONNECT, MAKE_MOVE, LEAVE, RESIGN
+
+    public String redrawBoard(String... params){
+        //Redraws the chess board upon the user’s request.
+        PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
+        return "";
+    }
+
+    public String highlightLegalMoves(String... params){
+        /*Allows the user to input the piece for which they want to highlight legal moves.
+        The selected piece’s current square and all squares it can legally move to are highlighted.
+        This is a local operation and has no effect on remote users’ screens.*/
+        return "";
+    }
 
     public static void main(String[] args) {
         try {
@@ -61,7 +143,6 @@ public class ClientMain implements ServerMessageObserver {
         } catch (ResponseException e) {
             System.out.println("Failed to start client: " + e.getMessage());
         }
-
     }
 
     public String listGames() throws ResponseException {
@@ -126,6 +207,7 @@ public class ClientMain implements ServerMessageObserver {
                     "You must enter your desired player color as 'WHITE' or 'BLACK'.");
         }
         JoinGameRequest request = new JoinGameRequest(this.authToken, playerColor, Integer.parseInt(gameID));
+
         try{
             server.joinGame(request);
         }catch(Exception e){
@@ -137,13 +219,15 @@ public class ClientMain implements ServerMessageObserver {
                 System.out.print(e.getMessage());
             }
         }
-        ChessBoard board = new ChessGame().getBoard();
         if(playerColor.equals("WHITE")){
             PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
         }else{
             PrintBoard.drawBoard(board, ChessGame.TeamColor.BLACK);
         }
+
+        currentGameID = Integer.parseInt(gameID);
         state = State.GAMEPLAY;
+        ws.connect(this.authToken, currentGameID, this.username);
         return String.format("You have joined match %s as %s, Your Majesty. May your moves be wise and your victory swift.", gameID, playerColor);
     }
 
@@ -172,8 +256,11 @@ public class ClientMain implements ServerMessageObserver {
                     "That game doesn't exist.");
         }
         //call observe game
-        ChessBoard board = new ChessGame().getBoard();
+        this.currentGameID = Integer.parseInt(gameID);
+
         PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
+        //String authToken, int gameID, String username
+        ws.connect(this.authToken, Integer.parseInt(gameID), this.username);
         return String.format("You now stand as a watcher of match %s. Let the battle commence!.", Integer.parseInt(gameID));
     }
 
@@ -221,38 +308,10 @@ public class ClientMain implements ServerMessageObserver {
         return String.format("You are signed in as %s. Welcome Your Majesty, your court stands ready.", result.username());
     }
 
-    public String endGame (){
+    public String endGame (String... params){
         state = State.SIGNEDIN;
         System.out.println(SET_TEXT_COLOR_BLUE + "You have left the game." + RESET);
         return "Type 'help' to review your command options, Your Majesty.";
-    }
-
-    //these methods need to send websocket messages from client to server and vice versa. those messages should
-    //be CONNECT, MAKE_MOVE, LEAVE, RESIGN
-
-    public String redrawBoard(){
-        //Redraws the chess board upon the user’s request.
-        return "";
-    }
-
-    public String makeMove(){
-        /*Allow the user to input what move they want to make. The board is updated to
-        reflect the result of the move, and the board automatically updates on all clients involved in the game.
-         */
-        return "";
-    }
-
-    public String resign(){
-        /*Prompts the user to confirm they want to resign. If they do, the user forfeits
-        the game and the game is over. Does not cause the user to leave the game.*/
-        return "";
-    }
-
-    public String highlightLegalMoves(){
-        /*Allows the user to input the piece for which they want to highlight legal moves.
-        The selected piece’s current square and all squares it can legally move to are highlighted.
-        This is a local operation and has no effect on remote users’ screens.*/
-        return "";
     }
 
     public String clear() throws ResponseException{
@@ -307,9 +366,9 @@ public class ClientMain implements ServerMessageObserver {
                 case "clear" -> clear();
                 case "leave" -> endGame();
                 case "redraw" -> redrawBoard();
-                case "make move" -> makeMove();
+                case "move" -> makeMove();
                 case "resign" -> resign();
-                case "highlight legal moves" -> highlightLegalMoves();
+                case "highlight" -> highlightLegalMoves();
                 default -> help();
             };
         } catch (Exception e) {
@@ -334,9 +393,9 @@ public class ClientMain implements ServerMessageObserver {
                     help - to view your available commands
                     redraw chess board - Redraws the chess board upon the user’s request
                     leave - to leave the match and return to the Royal Command Menu
-                    make move -  input what move they want to make
+                    move -  input what move they want to make
                     resign - forfeits the game and the game is over.
-                    highlight legal moves -  input the piece for which they want to highlight legal moves.
+                    highlight -  input the piece for which they want to highlight legal moves.
                     clear - to reset the realm (for testing)
                     """;
         }
