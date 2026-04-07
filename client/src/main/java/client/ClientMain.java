@@ -2,40 +2,56 @@ package client;
 
 import chess.ChessBoard;
 import chess.ChessGame;
-import client.websocket.NotificationHandler;
-import client.websocket.WebSocketFacade;
+import client.websocket.ServerMessageObserver;
+import client.websocket.WebSocketCommunicator;
 import com.google.gson.Gson;
 import exception.ResponseException;
 
 import java.util.Arrays;
 import java.util.Scanner;
 
-import static java.awt.Color.RED;
 import static ui.EscapeSequences.*;
 
 import model.request.*;
 import model.result.*;
 import ui.PrintBoard;
-import webSocketMessages.Notification;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 //update with websocket
 
-public class ClientMain implements NotificationHandler {
+public class ClientMain implements ServerMessageObserver {
     private String authToken = null;
     private String username = null;
-    private final WebSocketFacade ws;
+    private final WebSocketCommunicator ws;
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
 
     public ClientMain(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
-        ws = new WebSocketFacade(serverUrl, this);
+        ws = new WebSocketCommunicator(serverUrl, this);
     }
 
-    public void notify(Notification notification) {
-        System.out.println(RED + notification.message());
-        printPrompt();
+    public void notify(ServerMessage message) {
+        switch(message.getServerMessageType()){
+            case NOTIFICATION -> displayNotification(((NotificationMessage) message).getMessage());
+            case ERROR -> displayError(((ErrorMessage) message).getErrorMessage());
+            case LOAD_GAME -> loadGame(((LoadGameMessage) message).getGame());
+        }
     }
+
+    public void displayNotification(String message){}
+
+    public void displayError(String message){}
+
+    public void loadGame(Object game){
+        //deserialize the game object
+        //replace the current game object with the new one
+        //redraw the board
+    }
+
 
     public static void main(String[] args) {
         try {
@@ -211,6 +227,9 @@ public class ClientMain implements NotificationHandler {
         return "Type 'help' to review your command options, Your Majesty.";
     }
 
+    //these methods need to send websocket messages from client to server and vice versa. those messages should
+    //be CONNECT, MAKE_MOVE, LEAVE, RESIGN
+
     public String redrawBoard(){
         //Redraws the chess board upon the user’s request.
         return "";
@@ -316,19 +335,6 @@ public class ClientMain implements NotificationHandler {
                     redraw chess board - Redraws the chess board upon the user’s request
                     leave - to leave the match and return to the Royal Command Menu
                     make move -  input what move they want to make
-                    resign - forfeits the game and the game is over.
-                    highlight legal moves -  input the piece for which they want to highlight legal moves.
-                    clear - to reset the realm (for testing)
-                    """;
-        }
-
-        if (state == State.GAMECOMMANDS) {
-            return """
-                    ♔ GAMEPLAY MENU ♔
-                    help - to view your available commands
-                    redraw - Redraws the chess board upon the user’s request
-                    leave - to leave the match and return to the Royal Command Menu
-                    move -  input what move they want to make
                     resign - forfeits the game and the game is over.
                     highlight legal moves -  input the piece for which they want to highlight legal moves.
                     clear - to reset the realm (for testing)
