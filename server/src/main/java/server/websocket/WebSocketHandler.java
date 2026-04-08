@@ -119,13 +119,30 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.remove(gameID, session);
     }
 
-    private void leaveGame(Session session, UserGameCommand command) throws IOException {
-        int gameID = command.getGameID();
-        String username = command.getUsername();
-        connections.add(gameID, session);
-        var message = String.format("%s left the game", username);
-        sendMessage(session, command.getGameID(), new NotificationMessage(message));
-        connections.broadcast(gameID, session, new NotificationMessage(message));
+    private void leaveGame(Session session, UserGameCommand command) throws IOException, DataAccessException {
+
+        AuthData auth = authDao.getAuth(command.getAuthToken());
+        GameData game = gameDao.getGame(command.getGameID());
+        String notification = "No one has left the game";
+
+        String user = auth.username();
+        int id = game.gameID();
+        if(user.equals(game.whiteUsername())){
+            //int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game
+            GameData newData = new GameData(id, null, game.blackUsername(), game.gameName(), game.game());
+            notification = String.format("%s left the game.", game.whiteUsername());
+            gameDao.updateGame(newData);
+        }else if (user.equals(game.blackUsername())){
+            GameData newData = new GameData(id, game.whiteUsername(), null, game.gameName(), game.game());
+            gameDao.updateGame(newData);
+            notification = String.format("%s left the game.", game.blackUsername());
+        }else{
+            //don't forget observer
+            notification = String.format("%s left the game.", user);
+        }
+        connections.remove(id, session);
+        connections.broadcast(id, session, new NotificationMessage(notification));
+
     }
 
     private void resign(Session session, UserGameCommand command) throws IOException, DataAccessException {
