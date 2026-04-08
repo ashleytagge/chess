@@ -1,5 +1,7 @@
 package server.websocket;
 
+import com.google.gson.Gson;
+import exception.ResponseException;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
 
@@ -16,6 +18,9 @@ public class ConnectionManager {
     public final ConcurrentHashMap<Integer, Set<Session>> connections = new ConcurrentHashMap<>();
 
     public void add(int gameID, Session session) {
+        /*if gameID not in map:
+    create new empty session set for that gameID
+add session to that gameID's set*/
         Set<Session> currentSessions = connections.get(gameID);
         if(currentSessions == null){
             currentSessions = ConcurrentHashMap.newKeySet();
@@ -24,18 +29,28 @@ public class ConnectionManager {
         currentSessions.add(session);
     }
 
-    public void remove(Session session) {
-        //if the session exists remove if
-        connections.remove(session);
+    public void remove(int gameID, Session session) throws ResponseException {
+        Set<Session> currentSessions = connections.get(gameID);
+        if(currentSessions == null){
+            throw new ResponseException(ResponseException.Code.ClientError, "That session does not exist");
+        }
+
+        currentSessions.remove(session);
+        if(currentSessions.isEmpty()){
+            connections.remove(gameID);
+        }
     }
 
     //broadcast will be the same
-    public void broadcast(Session excludeSession, ServerMessage notification) throws IOException {
-        String msg = notification.toString();
-        for (Session c : connections.values()) {
-            if (c.isOpen()) {
-                if (!c.equals(excludeSession)) {
-                    c.getRemote().sendString(msg);
+    public void broadcast(int gameID, Session excludeSession, ServerMessage notification) throws IOException, ResponseException {
+        Set<Session> sessions = connections.get(gameID);
+        if(sessions != null){
+            String msg = new Gson().toJson(notification);
+            for (Session c : sessions) {
+                if (c.isOpen()) {
+                    if (!c.equals(excludeSession)) {
+                        c.getRemote().sendString(msg);
+                    }
                 }
             }
         }
