@@ -53,7 +53,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         ctx.enableAutomaticPings();
     }
 
-    public void handleMessage(@NotNull WsMessageContext ctx) throws ResponseException, IOException {
+    @Override
+    public void handleMessage(@NotNull WsMessageContext ctx) throws IOException {
         int gameID = -1;
         Session session = ctx.session;
         ChessMove move = null;
