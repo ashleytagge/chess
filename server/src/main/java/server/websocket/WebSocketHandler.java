@@ -1,6 +1,7 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
@@ -71,7 +72,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    public void sendMessage(Session session, int gameID, ServerMessage message){}
+    public void sendMessage(Session session, int gameID, ServerMessage message) throws IOException {
+        String json = new Gson().toJson(message);
+        session.getRemote().sendString(json);
+    }
 
     public void saveSession(int gameID, Session session){}
 

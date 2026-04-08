@@ -69,7 +69,7 @@ public class Server {
                 .get("/game", gameHandler::listGames)
                 .post("/game", gameHandler::createGame)
                 .put("/game", gameHandler::joinGame)
-                .exception(DataAccessException.class, this::exceptionHandler);
+                .exception(DataAccessException.class, this::exceptionHandler)
                 .ws("/ws", ws -> {
                     ws.onConnect(webSocketHandler);
                     ws.onMessage(webSocketHandler);
