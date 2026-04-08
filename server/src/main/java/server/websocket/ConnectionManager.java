@@ -18,21 +18,21 @@ public class ConnectionManager {
     public final ConcurrentHashMap<Integer, Set<Session>> connections = new ConcurrentHashMap<>();
 
     public void add(int gameID, Session session) {
-        /*if gameID not in map:
-    create new empty session set for that gameID
-add session to that gameID's set*/
         Set<Session> currentSessions = connections.get(gameID);
         if(currentSessions == null){
             currentSessions = ConcurrentHashMap.newKeySet();
             Set<Session> currentConnections = connections.putIfAbsent(gameID, currentSessions);
+            if (currentConnections != null) {
+                currentSessions = currentConnections;
+            }
         }
         currentSessions.add(session);
     }
 
-    public void remove(int gameID, Session session) throws ResponseException {
+    public void remove(int gameID, Session session) {
         Set<Session> currentSessions = connections.get(gameID);
         if(currentSessions == null){
-            throw new ResponseException(ResponseException.Code.ClientError, "That session does not exist");
+           return;
         }
 
         currentSessions.remove(session);
