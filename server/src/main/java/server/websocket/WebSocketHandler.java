@@ -158,15 +158,34 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var notification = String.format("%s moved from %s to %s", username, start, end);
 
         Set<Session> sessions = connections.get(gameID);
+        String message = "";
 
         if(sessions != null){
             for (Session c : sessions) {
-                if (c.isOpen()) {
+                if (c.isOpen()){
                     sendMessage(c, command.getGameID(), new LoadGameMessage(game.game()));
+                    if(game.game().isInCheckmate(ChessGame.TeamColor.BLACK)){
+                        message = "the black player is in checkmate";
+                        sendMessage(c, command.getGameID(), new NotificationMessage(message));
+                    } else if(game.game().isInCheck(ChessGame.TeamColor.BLACK)){
+                        message = "the black player is in check";
+                        sendMessage(c, command.getGameID(), new NotificationMessage(message));
+                    } else if(game.game().isInStalemate(ChessGame.TeamColor.BLACK)){
+                        message = "the black player is in stalemate";
+                        sendMessage(c, command.getGameID(), new NotificationMessage(message));
+                    } else if(game.game().isInCheckmate(ChessGame.TeamColor.WHITE)){
+                        message = "the white player is in checkmate";
+                        sendMessage(c, command.getGameID(), new NotificationMessage(message));
+                    } else if(game.game().isInCheck(ChessGame.TeamColor.WHITE)){
+                        message = "the white player is in check";
+                        sendMessage(c, command.getGameID(), new NotificationMessage(message));
+                    } else if(game.game().isInStalemate(ChessGame.TeamColor.WHITE)){
+                        message = "the white player is in stalemate";
+                        sendMessage(c, command.getGameID(), new NotificationMessage(message));
+                    }
                 }
             }
         }
-
         connections.broadcast(gameID, session, new NotificationMessage(notification));
     }
 
