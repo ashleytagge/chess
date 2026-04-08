@@ -54,11 +54,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             saveSession(gameID, session);
 
             switch(command.getCommandType()) {
-                case CONNECT -> connect(session, username, gameID, command);
-                case MAKE_MOVE -> makeMove(session, username, gameID, command);
+                case CONNECT -> connect(session, command);
+                case MAKE_MOVE -> makeMove(session, command);
                     //deserialize as a make move command if its make move
-                case LEAVE -> leaveGame(session, username, gameID, command);
-                case RESIGN -> resign(session, username, gameID, command);
+                case LEAVE -> leaveGame(session, command);
+                case RESIGN -> resign(session, command);
             }
         }catch (Exception ex){
             ex.printStackTrace();
@@ -104,33 +104,28 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void makeMove(Session session, String username, int gameID, UserGameCommand command) throws IOException {
-        var message = String.format("%s made a move", username);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-        connections.broadcast(gameID, session, notification);
-        try{
-            connections.remove(gameID, session);
-        }catch(ResponseException ex){
-            sendMessage(session, gameID, new ErrorMessage("Error: " + ex.getMessage()));
-        }
+    private void makeMove(Session session, UserGameCommand command) throws IOException {
+        String username = command.getUsername();
+        int gameID = command.getGameID();
+        var notification = String.format("%s made a move", username);
+        connections.broadcast(gameID, session, new NotificationMessage(notification));
+        connections.remove(gameID, session);
     }
 
-    private void leaveGame(Session session, String username, int gameID, UserGameCommand command) throws IOException {
+    private void leaveGame(Session session, UserGameCommand command) throws IOException {
+        int gameID = command.getGameID();
+        String username = command.getUsername();
         connections.add(gameID, session);
         var message = String.format("%s left the game", username);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-        connections.broadcast(gameID, session, notification);
+        connections.broadcast(gameID, session, new NotificationMessage(message));
     }
 
-    private void resign(Session session, String username, int gameID, UserGameCommand command) throws IOException {
+    private void resign(Session session, UserGameCommand command) throws IOException {
+        int gameID = command.getGameID();
+        String username = command.getUsername();
         var message = String.format("%s resigned from the game", username);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-        connections.broadcast(gameID, session, notification);
-        try{
-            connections.remove(gameID, session);
-        }catch(ResponseException ex){
-            sendMessage(session, gameID, new ErrorMessage("Error: " + ex.getMessage()));
-        }
+        connections.broadcast(gameID, session, new NotificationMessage(message));
+        connections.remove(gameID, session);
     }
 
 }
