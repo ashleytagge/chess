@@ -9,6 +9,7 @@ public class ChessGame {
 
     private ChessBoard board;
     private TeamColor teamColor;
+    private boolean gameOver = false;
 
     public ChessGame() {
         board = new ChessBoard();
@@ -27,6 +28,14 @@ public class ChessGame {
     public enum TeamColor {
         WHITE,
         BLACK
+    }
+
+    public void setGameOver(){
+        this.gameOver = true;
+    }
+
+    public boolean getGameOver(){
+        return gameOver;
     }
 
      // Gets a valid moves for a piece at the given location

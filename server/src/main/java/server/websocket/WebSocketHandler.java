@@ -25,11 +25,15 @@ import websocket.messages.ServerMessage;
 import exception.ResponseException;
 
 import java.io.IOException;
+import java.util.Objects;
+import java.util.Set;
+
 //petshop, modify for chess
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
     private final GameDAO gameDao;
     private final AuthDAO authDao;
+
 
     public WebSocketHandler(GameDAO gameDao, AuthDAO authDao){
         this.gameDao = gameDao;
@@ -92,7 +96,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             sendMessage(session, command.getGameID(), new ErrorMessage("error: bad request"));
             return;
         }
-
         connections.add(command.getGameID(), session);
         sendMessage(session, command.getGameID(), new LoadGameMessage(game.game()));
 
@@ -121,13 +124,32 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String username = command.getUsername();
         connections.add(gameID, session);
         var message = String.format("%s left the game", username);
+        sendMessage(session, command.getGameID(), new NotificationMessage(message));
         connections.broadcast(gameID, session, new NotificationMessage(message));
     }
 
-    private void resign(Session session, UserGameCommand command) throws IOException {
+    private void resign(Session session, UserGameCommand command) throws IOException, DataAccessException {
+
+        AuthData auth = authDao.getAuth(command.getAuthToken());
+        GameData game = gameDao.getGame(command.getGameID());
+
+        if(!auth.username().equals(game.blackUsername()) && !auth.username().equals(game.whiteUsername())){
+            sendMessage(session, command.getGameID(), new ErrorMessage("error: you cannot resign as an observer"));
+            return;
+        }
+        boolean gameOver;
+        gameOver = game.game().getGameOver();
+        if(gameOver){
+            sendMessage(session, command.getGameID(), new ErrorMessage("error: this game is over"));
+            return;
+        }
+
         int gameID = command.getGameID();
         String username = command.getUsername();
         var message = String.format("%s resigned from the game", username);
+        game.game().setGameOver();
+        gameDao.updateGame(game);
+        sendMessage(session, command.getGameID(), new NotificationMessage(message));
         connections.broadcast(gameID, session, new NotificationMessage(message));
         connections.remove(gameID, session);
     }
