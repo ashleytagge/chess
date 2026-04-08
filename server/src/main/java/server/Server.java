@@ -8,13 +8,17 @@ import server.handler.UserHandler;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import server.websocket.WebSocketHandler;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
 import java.util.Map;
 
+import static io.javalin.apibuilder.ApiBuilder.ws;
+
 public class Server {
 //update this class with websocket
+    private final WebSocketHandler webSocketHandler;
     private final Javalin javalin;
 
     public Server(){
@@ -55,6 +59,8 @@ public class Server {
         GameHandler gameHandler = new GameHandler(gameService);
         UserHandler userHandler = new UserHandler(userService);
 
+        webSocketHandler = new WebSocketHandler();
+
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .delete("/db", clearHandler::clearApp)
                 .post("/user", userHandler::register)
@@ -64,6 +70,11 @@ public class Server {
                 .post("/game", gameHandler::createGame)
                 .put("/game", gameHandler::joinGame)
                 .exception(DataAccessException.class, this::exceptionHandler);
+                .ws("/ws", ws -> {
+                    ws.onConnect(webSocketHandler);
+                    ws.onMessage(webSocketHandler);
+                    ws.onClose(webSocketHandler);
+                });
     }
 
     public int run(int desiredPort) {

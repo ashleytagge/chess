@@ -25,6 +25,7 @@ public class ConnectionManager {
     }
 
     public void remove(Session session) {
+        //if the session exists remove if
         connections.remove(session);
     }
 
