@@ -5,70 +5,51 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
+import java.util.Objects;
+
 public class PrintBoard {
 
-    private static String pieceToSymbol(ChessPiece piece) {
-        if (piece == null){
-            return EscapeSequences.EMPTY;
-        }
-
-        return switch (piece.getTeamColor()) {
-            case WHITE -> switch (piece.getPieceType()) {
-                case KING -> EscapeSequences.WHITE_KING;
-                case QUEEN -> EscapeSequences.WHITE_QUEEN;
-                case BISHOP -> EscapeSequences.WHITE_BISHOP;
-                case KNIGHT -> EscapeSequences.WHITE_KNIGHT;
-                case ROOK -> EscapeSequences.WHITE_ROOK;
-                case PAWN -> EscapeSequences.WHITE_PAWN;
-            };
-            case BLACK -> switch (piece.getPieceType()) {
-                case KING -> EscapeSequences.BLACK_KING;
-                case QUEEN -> EscapeSequences.BLACK_QUEEN;
-                case BISHOP -> EscapeSequences.BLACK_BISHOP;
-                case KNIGHT -> EscapeSequences.BLACK_KNIGHT;
-                case ROOK -> EscapeSequences.BLACK_ROOK;
-                case PAWN -> EscapeSequences.BLACK_PAWN;
-            };
-        };
-    }
-
     public static void drawBoard(ChessBoard board, ChessGame.TeamColor playerColor) {
-        boolean whitePerspective = playerColor != ChessGame.TeamColor.BLACK;
-
+        //is it white or black
+        boolean isWhite = playerColor == ChessGame.TeamColor.WHITE;
         System.out.print(EscapeSequences.RESET);
-        printFiles(whitePerspective);
+        printHeaderFooter(isWhite);
 
-        for (int displayRank = 0; displayRank < 8; displayRank++) {
-            int rank = whitePerspective ? 8 - displayRank : displayRank + 1;
+        //print out alternating colored tiles nested for loop for rows and columns
+        for (int row = 0; row < 8; row++) {
 
+            //get orientation for rows/rank labels and print out
+            int rank;
+            if(isWhite){
+                rank = 8 - row;
+            }else{
+                rank = row + 1;
+            }
             System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
             System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
             System.out.print(" " + rank + " ");
             System.out.print(EscapeSequences.RESET);
 
-            for (int displayFile = 0; displayFile < 8; displayFile++) {
+            for (int column = 0; column < 8; column++) {
                 int file;
-
-                if (whitePerspective) {
-                    file = displayFile + 1;
+                if (isWhite) {
+                    file = column + 1;
                 } else {
-                    file = 8 - displayFile;
+                    file = 8 - column;
+                }
+                //figure out a way to determine light or dark square
+                //print out the square with the right color
+                if(file % 2 != 0 && rank % 2 == 0 || file % 2 == 0 && rank % 2 != 0){
+                    System.out.print(EscapeSequences.SET_BG_COLOR_CREAM);
+                }else{
+                    System.out.print(EscapeSequences.SET_BG_COLOR_BROWN);
                 }
 
-                boolean lightSquare = ((file + rank) % 2 == 1);
-
-                System.out.print(lightSquare
-                        ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY
-                        : EscapeSequences.SET_BG_COLOR_BLACK);
-
+                //get cute chess piece yayayay fun part
                 ChessPiece piece = board.getPiece(new ChessPosition(rank, file));
-                String symbol = pieceToSymbol(piece);
+                String symbol = getString(piece);
 
-                System.out.print(lightSquare
-                        ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY
-                        : EscapeSequences.SET_BG_COLOR_BLACK);
-
-                if (piece != null) {
+                if(piece != null){
                     if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                         System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
                     } else {
@@ -87,35 +68,54 @@ public class PrintBoard {
             System.out.println();
         }
 
-        printFiles(whitePerspective);
+        printHeaderFooter(isWhite);
         System.out.print(EscapeSequences.RESET);
     }
 
-    private static void printFiles(boolean whitePerspective) {
+    private static String getString(ChessPiece piece) {
+        String symbol = "";
+
+        if (piece == null){
+            return EscapeSequences.EM_SPACE;
+        }
+
+        switch (Objects.requireNonNull(piece).getPieceType()) {
+            case KING ->  symbol = EscapeSequences.BLACK_KING;
+            case QUEEN ->  symbol = EscapeSequences.BLACK_QUEEN;
+            case BISHOP ->  symbol = EscapeSequences.BLACK_BISHOP;
+            case KNIGHT ->  symbol = EscapeSequences.BLACK_KNIGHT;
+            case ROOK ->  symbol = EscapeSequences.BLACK_ROOK;
+            case PAWN ->  symbol = EscapeSequences.BLACK_PAWN;
+        }
+        return symbol;
+    }
+
+    private static void printHeaderFooter(boolean whitePerspective) {
 
         System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
         System.out.print("   ");
         System.out.print(EscapeSequences.RESET);
 
         for (int i = 0; i < 8; i++) {
-            char file;
+            int file;
+            char nextFile;
 
-            if (whitePerspective) {
-                file = (char) ('a' + i);
+            if (!whitePerspective) {
+                file = 'h' - i;
+                nextFile = (char) (file);
             } else {
-                file = (char) ('h' - i);
+                file = 'a' + i;
+                nextFile = (char) file;
             }
-
             System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
             System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
-            System.out.print(" " + file + " ");
+            System.out.print(" " + nextFile + " ");
             System.out.print(EscapeSequences.RESET);
         }
 
         System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
         System.out.print("   ");
         System.out.print(EscapeSequences.RESET);
-
         System.out.println();
     }
 }
