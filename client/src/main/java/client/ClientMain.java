@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -73,11 +74,17 @@ public class ClientMain implements ServerMessageObserver {
             throw new ResponseException(ResponseException.Code.ClientError,
                     "Expected: move <start row> <start column> <end row> <end column> <promotion piece>");
         }
-
+        //make sure the start row and end row are between 1-8
         int startPosRow = Integer.parseInt(params[1]);
         int startPosCol = Integer.parseInt(params[2]);
         int endPosRow = Integer.parseInt(params[3]);
         int endPosCol = Integer.parseInt(params[4]);
+
+        if((startPosRow <= 8 && startPosRow >= 0) || (startPosCol <= 8 && startPosCol >= 0) ||
+                (endPosRow <= 8 && endPosRow >= 0) || (endPosCol <= 8 && endPosCol >= 0)){
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "error: that move is off of the board");
+        }
 
         ChessPiece.PieceType promotionPiece = null;
 
