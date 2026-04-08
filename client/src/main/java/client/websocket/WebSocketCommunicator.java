@@ -43,15 +43,6 @@ public class WebSocketCommunicator extends Endpoint {
         }
     }
 
-    private void handleMessage(String messageString){
-        try{
-            ServerMessage message = new Gson().fromJson(messageString, ServerMessage.class);
-            serverMessageObserver.notify(message);
-        }catch(Exception ex){
-            serverMessageObserver.notify(new ErrorMessage(ex.getMessage()));
-        }
-    }
-
     public void makeMove(String authToken, int gameID, String username, ChessMove move) throws ResponseException {
         try {
             var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, username, move);
