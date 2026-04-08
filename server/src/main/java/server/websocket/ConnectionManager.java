@@ -42,7 +42,7 @@ add session to that gameID's set*/
     }
 
     //broadcast will be the same
-    public void broadcast(int gameID, Session excludeSession, ServerMessage notification) throws IOException, ResponseException {
+    public void broadcast(int gameID, Session excludeSession, ServerMessage notification) throws IOException{
         Set<Session> sessions = connections.get(gameID);
         if(sessions != null){
             String msg = new Gson().toJson(notification);

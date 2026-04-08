@@ -59,31 +59,39 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void saveSession(int gameID, Session session){}
 
     private void connect(Session session, String username, int gameID, UserGameCommand command) throws IOException {
-        connections.add(session);
+        connections.add(gameID, session);
         var message = String.format("%s has connected!", username);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-        connections.broadcast(session, notification);
+        connections.broadcast(gameID, session, notification);
     }
 
     private void makeMove(Session session, String username, int gameID, UserGameCommand command) throws IOException {
         var message = String.format("%s made a move", username);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-        connections.broadcast(session, notification);
-        connections.remove(session);
+        connections.broadcast(gameID, session, notification);
+        try{
+            connections.remove(gameID, session);
+        }catch(ResponseException ex){
+            sendMessage(session, gameID, new ErrorMessage("Error: " + ex.getMessage()));
+        }
     }
 
     private void leaveGame(Session session, String username, int gameID, UserGameCommand command) throws IOException {
-        connections.add(session);
+        connections.add(gameID, session);
         var message = String.format("%s left the game", username);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-        connections.broadcast(session, notification);
+        connections.broadcast(gameID, session, notification);
     }
 
     private void resign(Session session, String username, int gameID, UserGameCommand command) throws IOException {
         var message = String.format("%s resigned from the game", username);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-        connections.broadcast(session, notification);
-        connections.remove(session);
+        connections.broadcast(gameID, session, notification);
+        try{
+            connections.remove(gameID, session);
+        }catch(ResponseException ex){
+            sendMessage(session, gameID, new ErrorMessage("Error: " + ex.getMessage()));
+        }
     }
 
 }
