@@ -3,6 +3,7 @@ package server.websocket;
 import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
@@ -119,7 +120,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void makeMove(Session session, UserGameCommand command, ChessMove move) throws IOException, DataAccessException {
+    private void makeMove(Session session, UserGameCommand command, ChessMove move) throws IOException, DataAccessException, InvalidMoveException {
 
         AuthData auth = authDao.getAuth(command.getAuthToken());
         GameData game = gameDao.getGame(command.getGameID());
@@ -128,6 +129,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         Collection<ChessMove> validMoves = game.game().validMoves(start);
+        String username = auth.username();
+        int gameID = game.gameID();
 
         if(gameOver){
             sendMessage(session, command.getGameID(), new ErrorMessage("error: you can't make a move. this game is over."));
@@ -149,12 +152,22 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             sendMessage(session, command.getGameID(), new ErrorMessage("error: invalid move"));
             return;
         }
+        game.game().makeMove(move);
+        gameDao.updateGame(game);
 
-        String username = command.getUsername();
-        int gameID = command.getGameID();
-        var notification = String.format("%s made a move", username);
+        var notification = String.format("%s moved from %s to %s", username, start, end);
+
+        Set<Session> sessions = connections.get(gameID);
+
+        if(sessions != null){
+            for (Session c : sessions) {
+                if (c.isOpen()) {
+                    sendMessage(c, command.getGameID(), new LoadGameMessage(game.game()));
+                }
+            }
+        }
+
         connections.broadcast(gameID, session, new NotificationMessage(notification));
-        connections.remove(gameID, session);
     }
 
     private void leaveGame(Session session, UserGameCommand command) throws IOException, DataAccessException {

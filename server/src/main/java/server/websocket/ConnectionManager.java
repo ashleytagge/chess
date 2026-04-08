@@ -29,6 +29,10 @@ public class ConnectionManager {
         currentSessions.add(session);
     }
 
+    public Set<Session> get(int gameID){
+        return connections.get(gameID);
+    }
+
     public void remove(int gameID, Session session) {
         Set<Session> currentSessions = connections.get(gameID);
         if(currentSessions == null){
