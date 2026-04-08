@@ -2,6 +2,7 @@ package server.websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
@@ -25,8 +26,11 @@ import websocket.messages.ServerMessage;
 import exception.ResponseException;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
+
+import static websocket.commands.UserGameCommand.CommandType.MAKE_MOVE;
 
 //petshop, modify for chess
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
@@ -51,16 +55,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleMessage(@NotNull WsMessageContext ctx) throws ResponseException, IOException {
         int gameID = -1;
         Session session = ctx.session;
+        ChessMove move = null;
 
         try {
             UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+            if(command.getCommandType() == MAKE_MOVE){
+                move = command.getMove();
+            }
             gameID = command.getGameID();
             String username = command.getUsername();
             saveSession(gameID, session);
 
             switch(command.getCommandType()) {
                 case CONNECT -> connect(session, command);
-                case MAKE_MOVE -> makeMove(session, command);
+                case MAKE_MOVE -> makeMove(session, command, move);
                     //deserialize as a make move command if its make move
                 case LEAVE -> leaveGame(session, command);
                 case RESIGN -> resign(session, command);
@@ -111,7 +119,37 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void makeMove(Session session, UserGameCommand command) throws IOException {
+    private void makeMove(Session session, UserGameCommand command, ChessMove move) throws IOException, DataAccessException {
+
+        AuthData auth = authDao.getAuth(command.getAuthToken());
+        GameData game = gameDao.getGame(command.getGameID());
+        boolean gameOver = game.game().getGameOver();
+        ChessGame.TeamColor teamTurn = game.game().getTeamTurn();
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        Collection<ChessMove> validMoves = game.game().validMoves(start);
+
+        if(gameOver){
+            sendMessage(session, command.getGameID(), new ErrorMessage("error: you can't make a move. this game is over."));
+            return;
+        }
+
+        if(auth.username().equals(game.whiteUsername()) && teamTurn.equals(ChessGame.TeamColor.BLACK) ||
+                auth.username().equals(game.blackUsername()) && teamTurn.equals(ChessGame.TeamColor.WHITE)){
+            sendMessage(session, command.getGameID(), new ErrorMessage("error: it's not your turn."));
+            return;
+        }
+
+        if(!auth.username().equals(game.whiteUsername()) && !auth.username().equals(game.blackUsername())){
+            sendMessage(session, command.getGameID(), new ErrorMessage("error: you can't make a move as an observer"));
+            return;
+        }
+
+        if(!validMoves.contains(move)){
+            sendMessage(session, command.getGameID(), new ErrorMessage("error: invalid move"));
+            return;
+        }
+
         String username = command.getUsername();
         int gameID = command.getGameID();
         var notification = String.format("%s made a move", username);
