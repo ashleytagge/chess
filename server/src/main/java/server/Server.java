@@ -59,7 +59,7 @@ public class Server {
         GameHandler gameHandler = new GameHandler(gameService);
         UserHandler userHandler = new UserHandler(userService);
 
-        webSocketHandler = new WebSocketHandler();
+        webSocketHandler = new WebSocketHandler(gameDAO, authDAO);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .delete("/db", clearHandler::clearApp)
