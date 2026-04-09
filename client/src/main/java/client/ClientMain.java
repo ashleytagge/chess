@@ -9,6 +9,7 @@ import exception.ResponseException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -31,8 +32,8 @@ public class ClientMain implements ServerMessageObserver {
     private WebSocketCommunicator ws;
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
-    private ChessGame game = new ChessGame();
-    private ChessBoard board = game.getBoard();
+    private ChessGame currentGame = new ChessGame();
+    private ChessBoard board = currentGame.getBoard();
     private int currentGameID;
     ChessGame.TeamColor currentPlayerColor;
 
@@ -64,12 +65,34 @@ public class ClientMain implements ServerMessageObserver {
         //redraw the board
     }
 
+    public String highlightLegalMoves(String... params){
+        /*Allows the user to input the piece for which they want to highlight legal moves.
+        The selected piece’s current square and all squares it can legally move to are highlighted.
+        This is a local operation and has no effect on remote users’ screens.*/
+        return "";
+    }
+
+    public String displayLegalMoves(String... params){
+        //get the start position
+        //create new chess position
+        //new Collection<ChessMove>() legalMoves = currentGame.validMoves(startPos);
+        //print out the legal moves
+        return "";
+    }
+
+
     public String makeMove(String... params) throws ResponseException {
         /*Allow the user to input what move they want to make. The board is updated to
         reflect the result of the move, and the board automatically updates on all clients involved in the game.
          */
         //get move from user "Enter start position, end position, and promotion peice if applicable
         //create new chessmove
+        //if observer throw error bye you can't move duh
+        if(currentPlayerColor == null){
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "error: you can't make a move as an observer.");
+        }
+
         if (params.length != 6) {
             throw new ResponseException(ResponseException.Code.ClientError,
                     "Expected: move <start row> <start column> <end row> <end column> <promotion piece>");
@@ -104,33 +127,21 @@ public class ClientMain implements ServerMessageObserver {
         }
 
         ChessPosition startPosition = new ChessPosition(startPosRow,startPosCol);
-        ChessPosition endPosition = new ChessPosition(endPosRow, startPosCol);
+        ChessPosition endPosition = new ChessPosition(endPosRow, endPosCol);
 
         ChessMove newMove = new ChessMove(startPosition, endPosition, promotionPiece);
 
         try{
-            game.makeMove(newMove);
+            currentGame.makeMove(newMove);
         }catch(Exception ex){
             throw new ResponseException(ResponseException.Code.ClientError,
                     "That move is invalid");
         }
 
-        this.board = game.getBoard();
+        this.board = currentGame.getBoard();
         ws.makeMove(this.authToken, this.currentGameID, this.username, newMove);
         PrintBoard.drawBoard(board, currentPlayerColor);
         return "";
-    }
-
-    public String leave(String... params) throws ResponseException {
-        ws.leave(authToken, currentGameID, username);
-        ws = null;
-
-        currentGameID = -1;
-        currentPlayerColor = null;
-
-        state = State.SIGNEDIN;
-
-        return "You have left the game.";
     }
 
     public String resign(String... params) throws ResponseException {
@@ -139,26 +150,18 @@ public class ClientMain implements ServerMessageObserver {
         if (state != State.GAMEPLAY) {
             throw new ResponseException(ResponseException.Code.ClientError, "You are not inside of a game");
         }
-        if (currentPlayerColor == null) {
+        if ( currentPlayerColor == null) {
             return "You are observing this game. Observers can't resign.";
         }
         ws.resign(authToken, currentGameID, username);
+        currentPlayerColor = null;
+        currentGameID = -1;
         return "You have sent in your resignation";
     }
 
-    //these methods need to send websocket messages from client to server and vice versa. those messages should
-    //be CONNECT, MAKE_MOVE, LEAVE, RESIGN
 
     public String redrawBoard(String... params){
-        //Redraws the chess board upon the user’s request.
         PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
-        return "";
-    }
-
-    public String highlightLegalMoves(String... params){
-        /*Allows the user to input the piece for which they want to highlight legal moves.
-        The selected piece’s current square and all squares it can legally move to are highlighted.
-        This is a local operation and has no effect on remote users’ screens.*/
         return "";
     }
 
@@ -197,6 +200,8 @@ public class ClientMain implements ServerMessageObserver {
         this.authToken = null;
         this.username = null;
         state = State.SIGNEDOUT;
+        currentPlayerColor = null;
+        currentGameID = -1;
         return "You have withdrawn from the court. May you return in due time.";
     }
 
@@ -229,7 +234,7 @@ public class ClientMain implements ServerMessageObserver {
             throw new ResponseException(ResponseException.Code.ClientError,
                     "Hear ye, hear ye! The game ID must be a number!");
         }
-        if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")){
+        if (!playerColor.equalsIgnoreCase("white") && !playerColor.equalsIgnoreCase("black")){
             throw new ResponseException(ResponseException.Code.ClientError,
                     "You must enter your desired player color as 'WHITE' or 'BLACK'.");
         }
@@ -246,10 +251,14 @@ public class ClientMain implements ServerMessageObserver {
                 System.out.print(e.getMessage());
             }
         }
-        if(playerColor.equals("WHITE")){
+        if(playerColor.equalsIgnoreCase("white")){
             PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
-        }else{
+            currentPlayerColor = ChessGame.TeamColor.WHITE;
+        }else if (playerColor.equalsIgnoreCase("black")){
             PrintBoard.drawBoard(board, ChessGame.TeamColor.BLACK);
+            currentPlayerColor = ChessGame.TeamColor.BLACK;
+        }else{
+            PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
         }
 
         currentGameID = Integer.parseInt(gameID);
@@ -282,11 +291,9 @@ public class ClientMain implements ServerMessageObserver {
             throw new ResponseException(ResponseException.Code.ClientError,
                     "That game doesn't exist.");
         }
-        //call observe game
-        this.currentGameID = Integer.parseInt(gameID);
 
+        state = State.GAMEPLAY;
         PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
-        //String authToken, int gameID, String username
         ws.connect(this.authToken, Integer.parseInt(gameID), this.username);
         return String.format("You now stand as a watcher of match %s. Let the battle commence!.", Integer.parseInt(gameID));
     }
@@ -335,8 +342,11 @@ public class ClientMain implements ServerMessageObserver {
         return String.format("You are signed in as %s. Welcome Your Majesty, your court stands ready.", result.username());
     }
 
-    public String endGame (String... params){
+    public String endGame (String... params) throws ResponseException {
+        ws.leave(authToken, currentGameID, username);
         state = State.SIGNEDIN;
+        currentGameID = -1;
+        currentPlayerColor = null;
         System.out.println(SET_TEXT_COLOR_BLUE + "You have left the game." + RESET);
         return "Type 'help' to review your command options, Your Majesty.";
     }
@@ -393,9 +403,9 @@ public class ClientMain implements ServerMessageObserver {
                 case "clear" -> clear();
                 case "leave" -> endGame();
                 case "redraw" -> redrawBoard();
-                case "move" -> makeMove();
+                case "move" -> makeMove(params);
                 case "resign" -> resign();
-                case "highlight" -> highlightLegalMoves();
+                case "highlight" -> highlightLegalMoves(params);
                 default -> help();
             };
         } catch (Exception e) {
@@ -418,7 +428,7 @@ public class ClientMain implements ServerMessageObserver {
             return """
                     ♔ GAMEPLAY MENU ♔
                     help - to view your available commands
-                    redraw chess board - Redraws the chess board upon the user’s request
+                    redraw - Redraws the chess board upon the user’s request
                     leave - to leave the match and return to the Royal Command Menu
                     move -  input what move they want to make
                     resign - forfeits the game and the game is over.
