@@ -9,7 +9,7 @@ public class ChessGame {
 
     private ChessBoard board;
     private TeamColor teamColor;
-    private boolean gameOver = false;
+    private boolean gameOver;
 
     public ChessGame() {
         board = new ChessBoard();

@@ -36,6 +36,7 @@ public class ClientMain implements ServerMessageObserver {
     private ChessBoard board = currentGame.getBoard();
     private int currentGameID;
     ChessGame.TeamColor currentPlayerColor;
+    private boolean gameOver;
 
 
     public ClientMain(String serverUrl) throws ResponseException {
@@ -81,6 +82,16 @@ public class ClientMain implements ServerMessageObserver {
         if(currentPlayerColor == null){
             throw new ResponseException(ResponseException.Code.ClientError,
                     "error: you can't make a move as an observer.");
+        }
+
+        if(currentPlayerColor == null){
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "error: you can't make a move as an observer.");
+        }
+
+        if(gameOver){
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "error: the game is over you can't make a move");
         }
 
         if (params.length != 6) {
@@ -149,6 +160,7 @@ public class ClientMain implements ServerMessageObserver {
         String input = scanner.nextLine().trim().toLowerCase();
         if (input.equals("yes")) {
             ws.resign(authToken, currentGameID, username);
+            gameOver = true;
             return "You forfeited the game!\nEnter 'leave' when you are ready to leave this game forever.";
         } else {
             return "Resignation canceled. Keep playing!";

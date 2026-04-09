@@ -204,16 +204,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             //int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game
             newData = new GameData(id, null, game.blackUsername(), game.gameName(), game.game());
             notification = String.format("%s left the game.", game.whiteUsername());
+            connections.remove(id, session);
             gameDao.updateGame(newData);
         }else if (user.equals(game.blackUsername())){
             newData = new GameData(id, game.whiteUsername(), null, game.gameName(), game.game());
+            connections.remove(id, session);
             gameDao.updateGame(newData);
             notification = String.format("%s left the game.", game.blackUsername());
         }else{
             //don't forget observer
             notification = String.format("%s left the game.", user);
+            connections.remove(id, session);
         }
-        connections.remove(id, session);
+
         connections.broadcast(id, session, new NotificationMessage(notification));
 
     }
