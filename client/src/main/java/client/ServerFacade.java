@@ -59,10 +59,9 @@ public class ServerFacade {
         return handleResponse(response, CreateGameResult.class);
     }
 
-    public JoinGameResult joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
+    public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
         var request = buildRequest("PUT", "/game", joinGameRequest.authToken(), joinGameRequest);
-        var response = sendRequest(request);
-        return handleResponse(response, JoinGameResult.class);
+        sendRequest(request);
     }
 
     private HttpRequest buildRequest(String method, String path, String authToken, Object body) {

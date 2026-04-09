@@ -251,9 +251,12 @@ public class ClientMain implements ServerMessageObserver {
         if(playerColor.equals("WHITE")){
             PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
             currentPlayerColor = ChessGame.TeamColor.WHITE;
-        }else{
+        }else if (playerColor.equals("BLACK")){
             PrintBoard.drawBoard(board, ChessGame.TeamColor.BLACK);
             currentPlayerColor = ChessGame.TeamColor.BLACK;
+        }else{
+            PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
+            currentPlayerColor = null;
         }
 
         currentGameID = Integer.parseInt(gameID);

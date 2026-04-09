@@ -63,11 +63,7 @@ public class GameService {
     public JoinGameResult joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
         AuthData auth = authDAO.getAuth(joinGameRequest.authToken());
         GameData game = gameDAO.getGame(joinGameRequest.gameID());
-         /*Retrieve the game
-        Check if requested color is already taken
-        If taken → throw "already taken"
-        Otherwise update the game with that username with new object
-        Call gameDAO.updateGame(updatedGame)*/
+
         if(joinGameRequest.playerColor().equals("WHITE")){
             if(game.whiteUsername() != null){
                 throw new DataAccessException("already taken");

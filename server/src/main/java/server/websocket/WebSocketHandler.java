@@ -199,13 +199,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         String user = auth.username();
         int id = game.gameID();
+        GameData newData;
         if(user.equals(game.whiteUsername())){
             //int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game
-            GameData newData = new GameData(id, null, game.blackUsername(), game.gameName(), game.game());
+            newData = new GameData(id, null, game.blackUsername(), game.gameName(), game.game());
             notification = String.format("%s left the game.", game.whiteUsername());
             gameDao.updateGame(newData);
         }else if (user.equals(game.blackUsername())){
-            GameData newData = new GameData(id, game.whiteUsername(), null, game.gameName(), game.game());
+            newData = new GameData(id, game.whiteUsername(), null, game.gameName(), game.game());
             gameDao.updateGame(newData);
             notification = String.format("%s left the game.", game.blackUsername());
         }else{
@@ -213,7 +214,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             notification = String.format("%s left the game.", user);
         }
         connections.remove(id, session);
-        gameDao.updateGame(game);
         connections.broadcast(id, session, new NotificationMessage(notification));
 
     }
