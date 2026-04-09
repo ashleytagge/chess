@@ -145,18 +145,24 @@ public class ClientMain implements ServerMessageObserver {
     }
 
     public String resign(String... params) throws ResponseException {
-       /*Prompts the user to confirm they want to resign. If they do, the user forfeits
-        the game and the game is over. Does not cause the user to leave the game.*/
+       //are you sure you want to resign? enter yes or no to continue playing or forfeit the game
+
+        if (state == State.OBSERVE) {
+            return "You are observing this game. Observers can't resign.";
+        }
         if (state != State.GAMEPLAY) {
             throw new ResponseException(ResponseException.Code.ClientError, "You are not inside of a game");
         }
-        if ( currentPlayerColor == null) {
-            return "You are observing this game. Observers can't resign.";
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Are you sure you want to resign and forfeit the game? Enter 'yes' or 'no': ");
+        String input = scanner.nextLine().trim().toLowerCase();
+        if (input.equals("yes")) {
+            ws.resign(authToken, currentGameID, username);
+            return "You forfeited the game!\nEnter 'leave' when you are ready to leave this game forever.";
+        } else {
+            return "Resignation canceled. Keep playing!";
         }
-        ws.resign(authToken, currentGameID, username);
-        currentPlayerColor = null;
-        currentGameID = -1;
-        return "You have sent in your resignation";
     }
 
 
@@ -234,7 +240,7 @@ public class ClientMain implements ServerMessageObserver {
             throw new ResponseException(ResponseException.Code.ClientError,
                     "Hear ye, hear ye! The game ID must be a number!");
         }
-        if (!playerColor.equalsIgnoreCase("white") && !playerColor.equalsIgnoreCase("black")){
+        if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")){
             throw new ResponseException(ResponseException.Code.ClientError,
                     "You must enter your desired player color as 'WHITE' or 'BLACK'.");
         }
@@ -251,14 +257,13 @@ public class ClientMain implements ServerMessageObserver {
                 System.out.print(e.getMessage());
             }
         }
-        if(playerColor.equalsIgnoreCase("white")){
+
+        if(playerColor.equals("WHITE")){
             PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
             currentPlayerColor = ChessGame.TeamColor.WHITE;
-        }else if (playerColor.equalsIgnoreCase("black")){
+        }else{
             PrintBoard.drawBoard(board, ChessGame.TeamColor.BLACK);
             currentPlayerColor = ChessGame.TeamColor.BLACK;
-        }else{
-            PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
         }
 
         currentGameID = Integer.parseInt(gameID);
@@ -269,6 +274,7 @@ public class ClientMain implements ServerMessageObserver {
 
     public String observeGame(String... params) throws ResponseException{
         assertSignedIn();
+        currentPlayerColor = null;
         //get gameID from user
         if (params.length != 1) {
             throw new ResponseException(ResponseException.Code.ClientError,
@@ -292,13 +298,15 @@ public class ClientMain implements ServerMessageObserver {
                     "That game doesn't exist.");
         }
 
-        state = State.GAMEPLAY;
+        state = State.OBSERVE;
         PrintBoard.drawBoard(board, ChessGame.TeamColor.WHITE);
         ws.connect(this.authToken, Integer.parseInt(gameID), this.username);
         return String.format("You now stand as a watcher of match %s. Let the battle commence!.", Integer.parseInt(gameID));
     }
 
     public String login(String... params) throws ResponseException {
+        currentPlayerColor = null;
+        currentGameID = -1;
         if (params.length == 2) {
             String username = params[0];
             String password = params[1];
@@ -319,6 +327,8 @@ public class ClientMain implements ServerMessageObserver {
 
     public String register(String... params) throws ResponseException{
         //get the username password and email from the user
+        currentPlayerColor = null;
+        currentGameID = -1;
         if (params.length != 3) {
             throw new ResponseException(ResponseException.Code.ClientError,
                     "Expected: register <USERNAME> <PASSWORD> <EMAIL>");
@@ -421,7 +431,6 @@ public class ClientMain implements ServerMessageObserver {
                     login <USERNAME> <PASSWORD> - to return to your throne
                     quit - to depart the court
                     help - to view your available commands
-                    clear - to reset the realm (for testing)
                     """;
         }
         if (state == State.GAMEPLAY) {
@@ -433,7 +442,14 @@ public class ClientMain implements ServerMessageObserver {
                     move -  input what move they want to make
                     resign - forfeits the game and the game is over.
                     highlight -  input the piece for which they want to highlight legal moves.
-                    clear - to reset the realm (for testing)
+                    """;
+        }
+        if(state == State.OBSERVE){
+            return """
+                    ♔ GAME OBSERVATION MENU ♔
+                    help - to view your available commands
+                    redraw - Redraws the chess board upon the user’s request
+                    leave - to leave the match and return to the Royal Command Menu
                     """;
         }
         return """
@@ -445,7 +461,6 @@ public class ClientMain implements ServerMessageObserver {
                 logout - to leave the court
                 quit - to depart the court
                 help - to view your available commands
-                clear - to reset the realm (for testing)
                 """;
     }
 

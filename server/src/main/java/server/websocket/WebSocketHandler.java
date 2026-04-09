@@ -17,6 +17,7 @@ import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
 import model.AuthData;
 import model.GameData;
+import org.eclipse.jetty.util.Scanner;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import websocket.commands.UserGameCommand;
@@ -212,6 +213,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             notification = String.format("%s left the game.", user);
         }
         connections.remove(id, session);
+        gameDao.updateGame(game);
         connections.broadcast(id, session, new NotificationMessage(notification));
 
     }
@@ -234,12 +236,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         int gameID = command.getGameID();
         String username = command.getUsername();
-        var message = String.format("%s resigned from the game", username);
+        var message = String.format("Game Over! %s forfeits the game!" +
+                "\nEnter 'leave' when you are ready to leave this game forever.", username);
+
         game.game().setGameOver();
         gameDao.updateGame(game);
+
         sendMessage(session, command.getGameID(), new NotificationMessage(message));
         connections.broadcast(gameID, session, new NotificationMessage(message));
-        connections.remove(gameID, session);
     }
 
 }
