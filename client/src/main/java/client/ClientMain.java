@@ -52,11 +52,9 @@ public class ClientMain implements ServerMessageObserver {
     }
 
     public void displayNotification(String... params){
-
     }
 
     public void displayError(String... params){
-
     }
 
     public void loadGame(Object game){
@@ -69,14 +67,6 @@ public class ClientMain implements ServerMessageObserver {
         /*Allows the user to input the piece for which they want to highlight legal moves.
         The selected piece’s current square and all squares it can legally move to are highlighted.
         This is a local operation and has no effect on remote users’ screens.*/
-        return "";
-    }
-
-    public String displayLegalMoves(String... params){
-        //get the start position
-        //create new chess position
-        //new Collection<ChessMove>() legalMoves = currentGame.validMoves(startPos);
-        //print out the legal moves
         return "";
     }
 
